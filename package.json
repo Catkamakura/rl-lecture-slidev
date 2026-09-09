@@ -1,0 +1,21 @@
+{
+  "name": "rl-lecture-slidev",
+  "version": "7.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "slidev slides.md --port 3030",
+    "build": "slidev build slides.md --base ./",
+    "export:notes": "slidev export-notes slides.md",
+    "build:pages": "node scripts/build-pages.mjs"
+  },
+  "dependencies": {
+    "@slidev/cli": "52.19.1",
+    "@slidev/theme-default": "^0.25.0",
+    "katex": "0.18.7",
+    "vue": "^3.5.0"
+  },
+  "devDependencies": {
+    "playwright-chromium": "^1.56.0"
+  }
+}

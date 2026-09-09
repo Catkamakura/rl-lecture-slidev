@@ -1,0 +1,8 @@
+node_modules/
+.slidev/
+*.pdf
+*.log
+dist/
+.env
+.env.*
+.vercel/
