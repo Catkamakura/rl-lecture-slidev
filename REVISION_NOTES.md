@@ -6,7 +6,7 @@ Updated 2026-09-10 from source commit `64ee865`. Old page numbers below refer to
 |---|---|---|
 | 15 | 15 | Removed the course-name mention from the student-facing episodic introduction. |
 | 18 | 17 | Recalls the policy definition before discussing its representation. |
-| 19 | 18 | Added a selectable tabular policy, shaded arrows, numeric probabilities, and independent row editing. |
+| 19 | 18 | Two complete policies, Uniform random and Always East, with persistent policy selection, shaded probabilities, and rollout controls. |
 | 23 | 22 | Shared-model output uses the same arrow display and retains the model calculations. |
 | 26 | 25 | Removed the disconnected takeaway. |
 | 27 | 26 | Added a decision/reward diagram; defines R1 for the bandit. |
@@ -33,8 +33,10 @@ The baseline section states the state-only baseline identity, qualified variance
 
 The PPO page uses the clipped actor surrogate in [Schulman et al. (2017)](https://arxiv.org/abs/1707.06347), Eq. 7. Hat-A estimates the collecting policy's advantage and stays fixed during optimization. The action ratio is introduced first. A Monte Carlo return minus a critic prediction is identified as one possible estimate; GAE remains in the appendix. Clipping does not impose a hard probability-ratio bound or guarantee a return increase.
 
-The tabular rows, shared-model features/weights, and bandit reward probabilities are specified teaching examples. Their visuals follow those definitions. Manually changing a row or shared weight is not training.
+The complete example policies, shared-model features/weights, and bandit reward probabilities are specified teaching examples. Their visuals follow those definitions. Choosing a policy or moving a shared weight is not training. The policy demo now preserves the chosen policy across grid selections and restarts; each nonterminal state displays that policy's probabilities. One-action and ten-action controls execute the selected policy using the grid's existing transition and reward rules.
 
 ## Verification
+
+The replacement policy demo was checked with both policies at all 24 nonterminal states. Checks cover policy persistence across cell changes and restarts, deterministic East movement and boundary self-loops, termination stopping a multi-action run, and all four random-action branches using controlled RNG inputs. These are implementation checks, not estimates of policy performance.
 
 The numerical verification script checks the existing return, policy-score, baseline, importance-sampling, and PPO arithmetic. Before the single-page deletion, browser checks covered all 80 slides, with focused rechecks after layout fixes. These covered equation rendering, section links, all 24 selectable tabular states, independent row edits, 12 shared-model state/parameter combinations, numeric/color agreement, and both PPO clipping directions. Source and presenter notes remain private; the public build omits notes.

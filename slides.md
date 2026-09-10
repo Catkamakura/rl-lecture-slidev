@@ -415,16 +415,12 @@ class: dense
 ---
 # A tabular policy stores one distribution per state
 
-The parameters $\theta$ are the stored probabilities:
+Choose a policy for the whole grid. Its table stores $\pi_\theta(a\mid s)=\theta_{s,a}$.
 
-$$\pi_\theta(a\mid s)=\theta_{s,a},\qquad\theta_{s,a}\geq0,\quad\sum_a\theta_{s,a}=1.$$
-
-<TabularPolicy />
-
-<p class="small muted">Manual table editing. The 24 nonterminal grid states store 24 × 4 = 96 probabilities.</p>
+<PolicyExamples />
 
 <!--
-Click (1,2) and read the four arrow probabilities .10,.20,.10,.60. Click (2,2) to see its uniform row. Favor East changes only that selected row. Return to (1,2): its row was unaffected. Darker fill means greater action probability; numeric labels show the exact displayed values. The table is hand-set, not learned. There are row-sum constraints, so 96 stored probabilities are not 96 independent degrees of freedom. The terminal goal needs no action row. The policy selects actions; even a boundary-pointing arrow is a valid action whose transition remains in place. Source: CS443 function approximation lecture, https://nanjiang.cs.illinois.edu/files/cs443s23/7_td_fa.pdf .
+Select one of two complete policies: uniform random has four probabilities .25 at every nonterminal state; Always East has probabilities [0,0,0,1] in N/S/W/E order at every nonterminal state. Clicking a cell restarts the episode there and resets its counters, while preserving the selected policy. Selecting a different policy starts a new run at the current position. Restart at (0,0) also preserves the policy. Take one action samples from the displayed distribution and applies the previously defined grid transition and -1 reward. Take up to 10 actions stops after ten or on reaching G, whichever comes first; this interaction limit is not an environmental terminal state. Always East from (0,0) reaches (4,0), then keeps choosing East and stays at the boundary. From (3,4), it reaches terminal G in one action. Random actions are sampled using the browser RNG; no particular trajectory or successful arrival is promised. At G, hide the action distribution and disable stepping. These policies are stipulated examples, not trained controllers. Tables contain 24 nonterminal rows, with four probabilities each and a row sum of one. Source: CS443 function approximation lecture, https://nanjiang.cs.illinois.edu/files/cs443s23/7_td_fa.pdf .
 -->
 
 ---
