@@ -4,10 +4,10 @@ const selected=ref(0),revealed=ref(false)
 const questions=[
  {label:'Objective',q:'In our grid, why does maximizing expected return favor shorter routes?',a:'Each move earns −1 and γ = 1. An episode of T moves has G₀ = −T, so J(π) = −Eπ[T]. The objective counts all remaining moves, not just the next reward.'},
  {label:'Markov',q:'Does a Markov state let us ignore future rewards?',a:'No. It summarizes the information needed to predict future transitions, given the action. The action still changes later states and rewards. Prediction and the optimization objective are different questions.'},
- {label:'Policy',q:'What changes when θ changes? Why use shared weights?',a:'θ controls action probabilities. A shared model uses the same weights across states, so learning can generalize. Those probabilities also determine which actions provide new training data.'},
+ {label:'Policy',q:'What changes when θ changes? Why use shared weights?',a:'θ controls action probabilities. A shared model uses the same weights across states, so an update can change predictions at other states. This need not improve them. Those probabilities also determine which actions provide new training data.'},
  {label:'REINFORCE',q:'At θ = 0, A gives +3. With α = 0.4, what is the update?',a:'The log-probability derivative is 0.5. The sampled gradient is 3 × 0.5 = 1.5, so θnew = 0 + 0.4 × 1.5 = 0.6. The new probability of A is about 0.646.'},
  {label:'Variance',q:'What variance does the baseline reduce in our example?',a:'The variance of the sampled gradient (G₀ − b) ∇log π, not the reward variance. With b = 1.5 it drops from 0.9375 to 0.375. The mean gradient stays 0.25.'},
- {label:'PPO',q:'Why does PPO use a ratio and restrict policy changes?',a:'The ratio reweights recorded actions relative to their collection policy. The surrogate still uses old states and estimates. Clipping or KL controls discourage excessive changes; PPO collects fresh data after several updates.'}
+ {label:'PPO',q:'Why does PPO use a ratio and discourage large policy changes?',a:'The ratio reweights recorded actions relative to their collection policy. The surrogate still uses old states and estimates. Clipping or KL controls discourage excessive changes; PPO collects fresh data after several updates.'}
 ]
 const question=computed(()=>questions[selected.value])
 function select(i){selected.value=i;revealed.value=false}

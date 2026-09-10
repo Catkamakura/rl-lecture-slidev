@@ -1,5 +1,9 @@
 # Teaching guide: RL foundations → REINFORCE → PPO
 
+## Claim audit
+
+See [CLAIM_AUDIT.md](CLAIM_AUDIT.md) for the complete correction register and a basis for every slide. Outcome descriptions are limited to exact examples or the disclosed seeded run. An unbiased gradient is not a policy-improvement guarantee. Use plain SGD when illustrating the exact θ + α ĝ step.
+
 ## Teaching structure
 
 Use the opening map to explain the argument. Each example has a purpose: navigation defines the task, the bandit makes a gradient update calculable, and a recorded episode extends the update through time. Return to the same bandit when introducing baselines.
@@ -17,7 +21,7 @@ Use the opening map to explain the argument. Each example has a purpose: navigat
 
 These are pacing estimates, not a one-slide-per-minute rule. Some transitions take seconds; demos and worked calculations need time. In a shorter class, assign the loss/code pair and optional PPO details as reading. Keep the formal objective, one-sample calculation, return-to-go, and baseline calculation in class. The appendix is a reference rather than part of the timed lecture.
 
-## What changed in this revision
+## Earlier structure revision
 
 - Added a clickable overview, section recaps, a persistent section/progress bar, and a linked appendix index.
 - Added an explicit contrast between RL feedback and supervised action labels. Distinguished planning with a known model from learning through samples.
@@ -49,7 +53,7 @@ Slide 24 defaults to policy gradients. Select the other routes to compare the in
 
 **One update, slide 32.** Every button restarts at theta=0 and alpha=.4. They compare possible observations, not sequential updates. A/+3 gives gradient 1.5, new theta .6, and p(A)≈.645656. A/−1 and B/+1 each give gradient −.5, new theta −.2, and p(A)≈.450166. One episode can point away from the better action. The estimate is correct in expectation, not necessarily close on each sample.
 
-**Training, slide 34.** Each batch contains 64 fresh one-action episodes under fixed parameters; alpha=.4, seed=443. After 40 batches, p(A)≈.931658. The learner only uses sampled actions, observed rewards, and policy derivatives. The analytical curve is a teaching reference, not an input to learning. Different seeds can give different finite-sample learning curves.
+**Seeded update demonstration, slide 34.** Each batch contains 64 fresh one-action episodes under fixed parameters; alpha=.4, seed=443. After 40 batches, p(A)≈.931658. The learner only uses sampled actions, observed rewards, and policy derivatives. The curve shows the sampled updates’ p(A). The separate numeric expected reward is calculated analytically as 1 + p and is not an input to learning. The reproduced curve describes one seed only. It does not establish reliable or monotonic improvement.
 
 **Baseline variance, slides 46–50.** Reset to the same bandit, theta=0. Its three action–reward outcomes have probabilities .375, .125, .5. Uncentered gradients are 1.5, −.5, −.5, with mean .25. The definition on slide 48 explains each column in slide 49.
 
@@ -75,7 +79,7 @@ For N independent episodes at fixed theta and a fixed baseline, the batch-mean v
 - Basic REINFORCE's uncorrected expectation is under the current policy. After an update, the old batch retains the old sampling frequencies. Recomputing log-probability derivatives does not change those frequencies.
 - In the old-p=.5/new-p=.8 bandit example, the unweighted old-data gradient has mean −.20 while the correct current-policy gradient is +.16. Action importance weights 1.6 and .4 restore +.16 in this one-state case.
 - A fixed state-only baseline has zero expected score contribution. Hold it fixed in the actor derivative. Fitting a baseline from the very same sampled action/reward can require care for strict finite-sample unbiasedness.
-- A value predictor trained on complete returns is a learned Monte Carlo baseline. Standard PPO usually also bootstraps value estimates and uses advantages; those details are optional.
+- A value predictor fitted to complete returns is a Monte Carlo baseline and can have prediction error. The PPO paper’s actor–critic algorithm also uses value predictions to estimate advantages; bootstrapping is introduced in the appendix.
 - PPO's action ratio is an importance-sampling weight inside a local surrogate. It does not fully correct changed state visitation or make a batch valid forever. Full-trajectory importance sampling requires a product of action ratios.
 - TRPO introduced a KL-constrained approach in 2015. The 2017 PPO paper includes clipping and an adaptive KL-penalty variant. A fixed-reference KL penalty in later RLHF applications serves a different role from comparison with the recent collecting policy.
 - For the exact start-state discounted objective, the return-to-go gradient includes an outer gamma^t. See Appendix D; do not silently omit it when switching objectives.

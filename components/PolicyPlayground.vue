@@ -45,7 +45,7 @@ const eastCalculation = computed(() => `\\frac{${model.value.exponentials[3].toF
       <p class="small-note">Probabilities sum to 1.<br>Displayed values are rounded.</p>
     </section>
   </div>
-  <p class="interaction-hint">Move θ: change the shared weight. Select a cell: change the input state.</p>
+  <p class="interaction-hint">Manual exploration: θ sets the shared weight. A cell click sets the input state.</p>
 </div>
 </template>
 <style scoped>

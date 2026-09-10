@@ -11,10 +11,10 @@ const result=computed(()=>oneUpdate(0,selected.value.action,selected.value.rewar
   <p>Each comparison starts at θ = 0, so p(A) = p(B) = 0.5. Learning rate α = 0.4.</p>
   <div class="outcome-controls"><button v-for="(item,i) in outcomes" :key="i" :class="{active:outcome===i}" @click="outcome=i">{{item.label}}</button></div>
   <div class="update-worked">
-    <section class="calculation"><h3>One observed sample</h3><p>Return <MathInline tex="G_0" /> = {{selected.reward}}</p><p>Log-probability derivative = {{result.score}}</p><p>Gradient estimate <MathInline tex="\hat g" /> = {{selected.reward}} × {{result.score}} = <strong class="sample-gradient">{{result.gradient.toFixed(1)}}</strong></p><p>New θ = 0 + 0.4 × {{result.gradient.toFixed(1)}} = {{result.nextTheta.toFixed(1)}}</p></section>
-    <section class="before-after"><h3>Probability of action A</h3><div class="bar-row"><span>Before</span><div class="track"><div style="width:50%"></div></div><strong>0.500</strong></div><div class="bar-row"><span>After</span><div class="track"><div :style="{width:result.nextP*100+'%'}"></div></div><strong class="updated-probability">{{result.nextP.toFixed(3)}}</strong></div><p>{{outcome===0?'A becomes more likely after this positive reward.':outcome===1?'This unlucky A outcome makes A less likely.':'This positive B reward makes B more likely, so A becomes less likely.'}}</p></section>
+    <section class="calculation"><h3>Chosen example outcome</h3><p>Return <MathInline tex="G_0" /> = {{selected.reward}}</p><p>Log-probability derivative = {{result.score}}</p><p>Gradient estimate <MathInline tex="\hat g" /> = {{selected.reward}} × {{result.score}} = <strong class="sample-gradient">{{result.gradient.toFixed(1)}}</strong></p><p>New θ = 0 + 0.4 × {{result.gradient.toFixed(1)}} = {{result.nextTheta.toFixed(1)}}</p></section>
+    <section class="before-after"><h3>Probability of action A</h3><div class="bar-row"><span>Before</span><div class="track"><div style="width:50%"></div></div><strong>0.500</strong></div><div class="bar-row"><span>After</span><div class="track"><div :style="{width:result.nextP*100+'%'}"></div></div><strong class="updated-probability">{{result.nextP.toFixed(3)}}</strong></div><p>{{outcome===0?'A becomes more likely after this positive reward.':outcome===1?'For A with reward −1, the update decreases p(A).':'This positive B reward makes B more likely, so A becomes less likely.'}}</p></section>
   </div>
-  <p class="sample-caveat">A is better on average, yet one observation can move the policy in the wrong direction.</p>
+  <p class="sample-caveat">Here J = 1 + p(A). The A/−1 and B/+1 updates decrease J.</p>
 </div>
 </template>
 <style scoped>

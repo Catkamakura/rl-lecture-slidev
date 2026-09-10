@@ -43,6 +43,10 @@ Open the URL printed in the terminal. The included `dist/` build runs locally wi
 - Hover at the upper right for Slidev's own presentation controls.
 - Add `/presenter/` to the URL for speaker notes.
 
+## Verification and claim audit
+
+[CLAIM_AUDIT.md](CLAIM_AUDIT.md) lists the removed or qualified claims and the basis for each slide. Run `node scripts/verify-lecture.mjs` to recompute the examples. This audit and presenter notes stay in the private source; the public build contains the lecture only.
+
 ## Interactive teaching material
 
 | Slide | Interaction |

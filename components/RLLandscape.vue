@@ -2,8 +2,8 @@
 import {ref,computed} from 'vue'
 const selected=ref(2)
 const routes=[
-{name:'Model-based',learn:'Learn how the world responds',steps:['Experience','Predict transitions + rewards','Plan actions'],example:'Grid: predict the next cell and move cost, then plan a route.',note:'A learned environment model supports planning. If the model is already known, we can plan without first learning it.'},
-{name:'Value-based',learn:'Learn which actions lead to high return',steps:['Experience','Estimate action values','Choose high-value actions'],example:'Grid: estimate the future return after each possible move.',note:'Action values score long-term consequences. A policy can choose an action with a high estimated value. Q-learning follows this route.'},
+{name:'Model-based',learn:'Estimate transitions and rewards',steps:['Experience','Predict transitions + rewards','Plan actions'],example:'Grid: predict the next cell and move cost, then plan a route.',note:'A learned environment model supports planning. If the model is already known, we can plan without first learning it.'},
+{name:'Value-based',learn:'Estimate returns for actions',steps:['Experience','Estimate action values','Choose high-value actions'],example:'Grid: estimate the future return after each possible move.',note:'Action values score long-term consequences. A policy can choose an action with a high estimated value. Q-learning follows this route.'},
 {name:'Policy gradients',learn:'Optimize policy parameters directly',steps:['Experience','Estimate a return gradient','Update the policy θ'],example:'Our route: sample actions, observe returns, and update their policy probabilities.',note:'REINFORCE uses complete sampled returns. Actor–critic methods also learn a value predictor to help update the actor.'}
 ]
 const route=computed(()=>routes[selected.value])

@@ -20,7 +20,7 @@ function reset(){Object.assign(live,createRun())}
 
 <template>
 <div class="reinforce-demo">
-  <div class="run-label">{{isPrintMode ? 'Example run: 40 batches, seed 443' : 'Live sampled REINFORCE run'}}</div>
+  <div class="run-label">{{isPrintMode ? 'Example run: 40 batches, seed 443' : 'Sampled REINFORCE run · seed 443'}}</div>
   <div class="training-body">
     <svg class="training-chart" viewBox="0 0 750 345" role="img" aria-label="Probability of choosing action A versus the number of training batches">
       <text x="18" y="22" class="axis-title">Probability of A</text>
@@ -38,7 +38,7 @@ function reset(){Object.assign(live,createRun())}
     <div class="training-values" aria-live="polite">
       <div>Completed batches<strong class="batch-count">{{shown.batch}}</strong></div>
       <div>Probability of A<strong class="current-prob">{{p.toFixed(3)}}</strong></div>
-      <div>Expected reward<strong class="expected-reward">{{(1+p).toFixed(3)}}</strong><span>Analytical evaluation: 1 + p</span></div>
+      <div>Expected reward<strong class="expected-reward">{{(1+p).toFixed(3)}}</strong><span>Exact model expectation: J = 1 + p</span></div>
     </div>
   </div>
   <div v-if="!isPrintMode" class="training-controls" @click.stop>
