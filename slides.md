@@ -426,51 +426,46 @@ Select one of two complete policies: uniform random has four probabilities .25 a
 ---
 class: dense
 ---
-# Why does a larger state space need more than a table?
+# What happens when the grid becomes finer?
 
-Imagine extending navigation to a moving robot. Discretize four state variables:
+A tabular policy stores **four probabilities per nonterminal state**.
 
-<div class="bin-product"><div><span>Horizontal x</span><b>100</b><small>bins</small></div><i>×</i><div><span>Vertical y</span><b>100</b><small>bins</small></div><i>×</i><div><span>Heading</span><b>36</b><small>bins</small></div><i>×</i><div><span>Speed</span><b>10</b><small>bins</small></div></div>
+| Position representation | State rows, excluding one terminal cell | Stored probabilities |
+|---|---:|---:|
+| Our $5\times5$ grid | $25-1=24$ | $24\times4=96$ |
+| A $100\times100$ grid | $10{,}000-1=9{,}999$ | $39{,}996$ |
+| Continuous positions $(x,y)\in[0,4]^2$ | Infinitely many | No finite table can list every state |
 
-$$
-100\times100\times36\times10=3.6\text{ million state rows.}
-$$
-
-<div class="cols">
-<div><h3>Storage</h3><p>Four actions need 14.4 million probabilities.<br>Finer bins make the table larger.</p></div>
-<div><h3>Experience</h3><p>Separate rows need separate experience.<br>Updating one row leaves the others unchanged.</p></div>
+<div class="cols table-limits">
+<div><h3>Discretize the space</h3><p>Group nearby positions into cells.<br>Finer cells require more rows.</p></div>
+<div><h3>Use a shared model</h3><p>Compute probabilities from the position.<br>Learn weights shared across states.</p></div>
 </div>
 
-<div class="takeaway">We want experience at one state to help at other states.</div>
+<p class="small">Continuous states do not always imply approximation error. A rule such as “always East” can be represented exactly.</p>
+
+<div class="takeaway">A shared policy model can replace the growing table.</div>
 
 <!--
-Represent the policy. Slide 19.
-Source: Nan Jiang, CS 443, function approximation motivation: https://nanjiang.cs.illinois.edu/files/cs443s23/7_td_fa.pdf . The source illustrates value approximation; this lecture applies the same scale and generalization motivation to a policy. These bin counts are illustrative, not a benchmark claim. A continuous state space cannot be enumerated by a finite exact table. Discretization trades resolution for size. Even when storage fits, collecting sufficient experience at each separate row can be infeasible. This is the central motivation to emphasize.
-Evidence: constructed example or displayed algebra, recomputed by scripts/verify-lecture.mjs. No benchmark or general improvement claim follows.
+Represent the policy. Slide 19. All finite-grid counts use four actions at each nonterminal state and one terminal cell. These are stored entries, not independent degrees of freedom: each probability row must sum to one. The continuous-space row is a representation comparison, not a newly specified navigation MDP. It does not reuse the discrete transition dynamics or assert termination at a point goal.
+A finite lookup table cannot enumerate a continuum of states. This does not prove that every continuous-state task needs approximation error, a neural network, or an approximate optimal policy. Compact policies such as a constant action rule can be represented exactly; special tasks can admit exact analytic solutions. In general learning problems, discretization (itself a form of state aggregation/function approximation) or a shared parameterized model provides a tractable representation. Discretization ties behavior within bins; a linear model or network shares parameters through features. Approximation here concerns the policy family, not necessarily imprecise measurement of the physical state. No successful generalization or training outcome is promised.
+Source for scale/generalization motivation: Nan Jiang, CS443 function approximation, PDF p.2, https://nanjiang.cs.illinois.edu/files/cs443s23/7_td_fa.pdf . That lecture treats values; here the representation argument is applied to policies. Source for a policy with its own function approximator: Sutton et al. (1999), PDF pp.1–2, https://proceedings.neurips.cc/paper_files/paper/1999/file/464d828b85b0bed98e80ade0a5c43b0f-Paper.pdf . Grid counts and the constant-policy example are direct calculations, not empirical claims.
 -->
 
 ---
 class: dense
 ---
-# Function approximation: parameters shared across states
+# The grid's policy table: what could we share?
 
-Replace separate rows with a **shared function**: a linear model or neural network.
+Each row stores **four action probabilities**. They sum to 1.
 
-<div class="flow-row"><div class="term">State features<br><MathInline tex="f(s)" /></div><span class="arrow">→</span><div class="term">Shared weights<br><MathInline tex="\theta" /></div><span class="arrow">→</span><div class="term">Action probabilities<br><MathInline tex="\pi_\theta(a\mid s)" /></div></div>
+<GridPolicyTable />
 
-| Tabular policy | Shared function approximator |
-|---|---|
-| Stores a separate row for each state | Computes probabilities from state features |
-| An update can change just one row | One weight change can affect many states |
-| Unvisited rows have no direct experience | Can generalize to unvisited states |
-
-For the next example, we choose **distance to the goal** as the shared features.
-
-<div class="takeaway">An update can affect other states. It may improve or worsen their action choices.</div>
+<div class="table-to-function"><b>Function approximation:</b> shared weights compute each row from state features.<br><MathInline tex="s\ \longrightarrow\ \text{model with weights }\theta\ \longrightarrow\ \pi_\theta(\cdot\mid s)" /></div>
 
 <!--
-Represent the policy. Slide 20.
-Source: Nan Jiang, CS 443, function approximation motivation: https://nanjiang.cs.illinois.edu/files/cs443s23/7_td_fa.pdf . The source illustrates value approximation; this lecture applies the same scale and generalization motivation to a policy. Here function approximation means a restricted shared model for the policy, not approximating the physical state. Generalization is a possibility, not a guarantee: unsuitable features or sharing can harm performance. The number of weights is chosen by the model architecture rather than by enumerating all states. Tabular models can also be written as functions with one-hot inputs; the teaching contrast is independent rows versus meaningful sharing. The same principle applies to value functions, but this sequence focuses on policies.
+Represent the policy. Slide 20. The full 24-row table is split into two blocks for readability, in row-major coordinate order: x increases across the grid and y down it. The terminal state (4,4) has no action row in this episodic demo. Both complete tables are stipulated policies: Uniform random [.25,.25,.25,.25] and Always East [0,0,0,1], in N/S/W/E order. Load a complete table intentionally replaces all rows. Clicking any cell or row only changes the selection; it preserves all table entries. Set this row to always East is explicitly a manual edit of one selected row. Start with Uniform random, edit (1,2), then select (2,2) to show the other row remains unchanged. This demonstrates independent parameters, not a training step or improved return. Orange row markers retain the edit locations.
+The 96 probabilities are stored values, not 96 unconstrained parameters; 24 row-sum constraints leave 72 independent degrees of freedom. Repeating identical numbers in these example tables is deliberate: a general tabular representation reserves a row for every state even when the present policy is simple. The two constant example policies themselves can be encoded by short exact rules. We want a flexible learned policy, so next consider a restricted shared model instead of independent state rows. Its weights can affect predictions at other states. This is parameter sharing, not guaranteed beneficial generalization, and the family may exclude an optimal policy. The dot in pi_theta(dot | s) denotes the entire vector of four action probabilities. The following slide defines the concrete feature, score, and softmax model. The small grid does not require function approximation; it makes the storage and sharing distinction visible.
+Sources: CS443 function approximation, PDF pp.2,5, https://nanjiang.cs.illinois.edu/files/cs443s23/7_td_fa.pdf ; Sutton et al. (1999), PDF pp.1–2, https://proceedings.neurips.cc/paper_files/paper/1999/file/464d828b85b0bed98e80ade0a5c43b0f-Paper.pdf .
 -->
 
 ---

@@ -22,8 +22,8 @@
 | 16 | Example: choose a reward that matches the task |
 | 17 | How can we represent a policy? |
 | 18 | A tabular policy stores one distribution per state |
-| 19 | Why does a larger state space need more than a table? |
-| 20 | Function approximation: parameters shared across states |
+| 19 | What happens when the grid becomes finer? |
+| 20 | The grid's policy table: what could we share? |
 | 21 | Specify the model before moving its parameter |
 | 22 | One shared model produces the action probabilities |
 | 23 | Where do policy gradients fit in RL? |

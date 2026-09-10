@@ -40,3 +40,14 @@ The complete example policies, shared-model features/weights, and bandit reward 
 The replacement policy demo was checked with both policies at all 24 nonterminal states. Checks cover policy persistence across cell changes and restarts, deterministic East movement and boundary self-loops, termination stopping a multi-action run, and all four random-action branches using controlled RNG inputs. These are implementation checks, not estimates of policy performance.
 
 The numerical verification script checks the existing return, policy-score, baseline, importance-sampling, and PPO arithmetic. Before the single-page deletion, browser checks covered all 80 slides, with focused rechecks after layout fixes. These covered equation rendering, section links, all 24 selectable tabular states, independent row edits, 12 shared-model state/parameter combinations, numeric/color agreement, and both PPO clipping directions. Source and presenter notes remain private; the public build omits notes.
+
+
+## Grid policy table and function approximation (current slides 19–20)
+
+Slide 20 now displays every nonterminal row of the 5×5 grid policy. Grid selection highlights the matching row. A manual edit changes only that row; loading Uniform random or Always East intentionally replaces the complete table. The closing diagram introduces a shared model before its concrete equations on slide 21.
+
+Slide 19 compares the original grid, a finer grid, and continuous positions. The storage counts are exact for four stored probabilities per nonterminal row and one terminal cell. No finite table enumerates a continuous state space. This is not a claim that all continuous-state policies require approximation error or neural networks: simple exact rules are possible. Discretization and shared models are practical representation choices. Approximation concerns the chosen policy family, not necessarily inaccurate state measurements.
+
+Sources: [CS443 function approximation, PDF pp.2,5](https://nanjiang.cs.illinois.edu/files/cs443s23/7_td_fa.pdf) for scaling and parameter sharing; [Sutton et al. (1999), PDF pp.1–2](https://proceedings.neurips.cc/paper_files/paper/1999/file/464d828b85b0bed98e80ade0a5c43b0f-Paper.pdf) for directly parameterized policies. These figures and manual edits illustrate representation; they do not establish better training or guaranteed generalization.
+
+Verification: the browser check counted all 24 rows and 96 probability entries, matched every nonterminal grid cell to its row, confirmed that one-row edits persist after changing selection, and checked both complete-table loads. It also verified that G has no selected action row and disables row editing. Rendered slides 19–22 had no equation errors or content overlapping the navigation bar. The public build continues to exclude notes.
