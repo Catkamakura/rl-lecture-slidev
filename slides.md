@@ -1125,7 +1125,7 @@ The batch estimates how actions perform when followed by the old policy. A large
 - Large changes can move the agent into states with little data.
 - A noisy estimate can receive too much influence over repeated updates.
 
-<div class="takeaway">The surrogate uses old-policy data. Clipping does not guarantee a trust region or a return increase.</div>
+<div class="takeaway">The update objective uses old-policy data. Clipping does not guarantee a trust region or a return increase.</div>
 
 <!--
 Reuse recent experience. Slide 46.
@@ -1151,7 +1151,7 @@ This is an **importance-sampling weight** for the action at that state.
 | $0.5$ | $0.5$ | $1.0$ | Keep it |
 | $0.5$ | $0.6$ | $1.2$ | Increase it |
 
-The unclipped score is $\rho_t(\theta)\hat A_t$. The batch and advantage estimates stay fixed during these updates.
+The batch and old probabilities stay fixed during these updates.
 
 <p class="small">This ratio corrects action frequencies at recorded states. It does not fully correct the distribution of entire trajectories. The appendix derives the distinction.</p>
 
