@@ -53,12 +53,11 @@ Open the URL printed in the terminal. The included `dist/` build runs locally wi
 |---:|---|
 | 2 | Course roadmap with section links |
 | 8 | Navigate the discounted grid, including the absorbing goal |
-| 10 | See all four available actions, vary the chosen policy’s probabilities, and calculate its expected return |
-| 14 | Change gamma and inspect weighted route rewards |
-| 18 | Choose Uniform random or Always East, select a start cell, and run the policy; selection persists across cells |
-| 20 | Inspect all 24 grid-policy rows; select a cell to highlight its row and edit that row independently |
-| 22 | Follow state features, scores, and softmax probabilities with the same arrow display |
-| 23 | Compare model-based, value-based, and policy-gradient routes |
+| 13 | Change gamma and inspect weighted route rewards |
+| 17 | Choose Uniform random or Always East, select a start cell, and run the policy; selection persists across cells |
+| 19 | Inspect all 24 grid-policy rows; select a cell to highlight its row and edit that row independently |
+| 21 | Follow state features, scores, and softmax probabilities with the same arrow display |
+| 22 | Compare model-based, value-based, and policy-gradient routes |
 | 27 | Change theta and see expected action counts for exploration |
 | 31 | Calculate three possible sampled REINFORCE updates |
 | 33 | Run actual sampled REINFORCE training |

@@ -233,23 +233,6 @@ Source: Nan Jiang, CS443 MDPs, printed slides 5, 8, https://nanjiang.cs.illinois
 ---
 class: dense
 ---
-# Example: expected return under a stochastic policy
-
-Same navigation MDP: $\gamma=0.99$. Fix the start at **$s_0=(3,4)$**. All four actions remain available.
-
-<PolicyReturn />
-
-<!--
-Connect the calculation to J(pi), already defined on slide 6. For this comparison the initial distribution is a point mass at (3,4), explicitly different from (0,0) on slide 8. The MDP transition/reward rules and gamma=.99 are unchanged. State-value notation is introduced later with values and advantages, not needed here.
-All four actions are available. From (3,4), North goes to (3,3), South hits the boundary and stays at (3,4), West goes to (2,4), and East reaches G=(4,4). Every one of these moves receives -1. The example policy specifically sets pi_q(N|s_0)=1-q, pi_q(S|s_0)=pi_q(W|s_0)=0, pi_q(E|s_0)=q. Zero probability is a policy choice, not an unavailable action. A uniform-random policy would give probability .25 to all four, and this two-route calculation would not apply to it.
-The continuation is stationary and state-based: choose East at (3,3) and South at (4,3). To complete the policy, choose East at every other state including G; all actions at G self-loop with reward zero. No nonabsorbing state is revisited on these two paths, so their probabilities are q and 1-q. At q=0 or 1, only one path has positive probability. The displayed two paths are consequences of this stipulated policy, not an exhaustive description of all possible grid trajectories.
-The original arithmetic is valid under these assumptions: path returns -1 and -2.9701, with mean -1.98505 at q=.5. The correction makes the omitted zero probabilities and fixed continuation explicit. Changing the slider changes the selected policy manually; it is not training. J is an expected return, not either individual path's return. Keep the zero-reward absorbing tail; the episodic extension is introduced separately on slide 15.
-Source: Nan Jiang, CS443 MDPs, printed slides 8, https://nanjiang.cs.illinois.edu/files/cs443s23/2_basic.pdf .
--->
-
----
-class: dense
----
 # Example: different histories, the same prediction
 
 The Markov condition says that history adds no information once the current state and action are given.
@@ -443,7 +426,7 @@ A tabular policy stores **four probabilities per nonterminal state**.
 <div class="takeaway">A shared policy model can replace the growing table.</div>
 
 <!--
-Represent the policy. Slide 19. All finite-grid counts use four actions at each nonterminal state and one terminal cell. These are stored entries, not independent degrees of freedom: each probability row must sum to one. The continuous-space row is a representation comparison, not a newly specified navigation MDP. It does not reuse the discrete transition dynamics or assert termination at a point goal.
+Represent the policy. Slide 18. All finite-grid counts use four actions at each nonterminal state and one terminal cell. These are stored entries, not independent degrees of freedom: each probability row must sum to one. The continuous-space row is a representation comparison, not a newly specified navigation MDP. It does not reuse the discrete transition dynamics or assert termination at a point goal.
 A finite lookup table cannot enumerate a continuum of states. This does not prove that every continuous-state task needs approximation error, a neural network, or an approximate optimal policy. Compact policies such as a constant action rule can be represented exactly; special tasks can admit exact analytic solutions. In general learning problems, discretization (itself a form of state aggregation/function approximation) or a shared parameterized model provides a tractable representation. Discretization ties behavior within bins; a linear model or network shares parameters through features. Approximation here concerns the policy family, not necessarily imprecise measurement of the physical state. No successful generalization or training outcome is promised.
 Source for scale/generalization motivation: Nan Jiang, CS443 function approximation, PDF p.2, https://nanjiang.cs.illinois.edu/files/cs443s23/7_td_fa.pdf . That lecture treats values; here the representation argument is applied to policies. Source for a policy with its own function approximator: Sutton et al. (1999), PDF pp.1–2, https://proceedings.neurips.cc/paper_files/paper/1999/file/464d828b85b0bed98e80ade0a5c43b0f-Paper.pdf . Grid counts and the constant-policy example are direct calculations, not empirical claims.
 -->
@@ -460,7 +443,7 @@ Each row stores **four action probabilities**. They sum to 1.
 <div class="table-to-function"><b>Function approximation:</b> shared weights compute each row from state features.<br><MathInline tex="s\ \longrightarrow\ \text{model with weights }\theta\ \longrightarrow\ \pi_\theta(\cdot\mid s)" /></div>
 
 <!--
-Represent the policy. Slide 20. The full 24-row table is split into two blocks for readability, in row-major coordinate order: x increases across the grid and y down it. The terminal state (4,4) has no action row in this episodic demo. Both complete tables are stipulated policies: Uniform random [.25,.25,.25,.25] and Always East [0,0,0,1], in N/S/W/E order. Load a complete table intentionally replaces all rows. Clicking any cell or row only changes the selection; it preserves all table entries. Set this row to always East is explicitly a manual edit of one selected row. Start with Uniform random, edit (1,2), then select (2,2) to show the other row remains unchanged. This demonstrates independent parameters, not a training step or improved return. Orange row markers retain the edit locations.
+Represent the policy. Slide 19. The full 24-row table is split into two blocks for readability, in row-major coordinate order: x increases across the grid and y down it. The terminal state (4,4) has no action row in this episodic demo. Both complete tables are stipulated policies: Uniform random [.25,.25,.25,.25] and Always East [0,0,0,1], in N/S/W/E order. Load a complete table intentionally replaces all rows. Clicking any cell or row only changes the selection; it preserves all table entries. Set this row to always East is explicitly a manual edit of one selected row. Start with Uniform random, edit (1,2), then select (2,2) to show the other row remains unchanged. This demonstrates independent parameters, not a training step or improved return. Orange row markers retain the edit locations.
 The 96 probabilities are stored values, not 96 unconstrained parameters; 24 row-sum constraints leave 72 independent degrees of freedom. Repeating identical numbers in these example tables is deliberate: a general tabular representation reserves a row for every state even when the present policy is simple. The two constant example policies themselves can be encoded by short exact rules. We want a flexible learned policy, so next consider a restricted shared model instead of independent state rows. Its weights can affect predictions at other states. This is parameter sharing, not guaranteed beneficial generalization, and the family may exclude an optimal policy. The dot in pi_theta(dot | s) denotes the entire vector of four action probabilities. The following slide defines the concrete feature, score, and softmax model. The small grid does not require function approximation; it makes the storage and sharing distinction visible.
 Sources: CS443 function approximation, PDF pp.2,5, https://nanjiang.cs.illinois.edu/files/cs443s23/7_td_fa.pdf ; Sutton et al. (1999), PDF pp.1–2, https://proceedings.neurips.cc/paper_files/paper/1999/file/464d828b85b0bed98e80ade0a5c43b0f-Paper.pdf .
 -->
@@ -514,7 +497,7 @@ This conversion is called **softmax**.
 <p class="small muted">Hand-designed teaching model. The next slider sets θ manually; no training occurs.</p>
 
 <!--
-Represent the policy. Slide 21.
+Represent the policy. Slide 20.
 Coordinates increase right and down. A state click changes dx and dy. A slider move changes theta, the only learnable parameter. The signs in the score formulas are hand-designed; they are not learned. South and East favor the goal because it is in the bottom-right corner. This family is deliberately restrictive, can waste boundary moves, and is not claimed to contain an optimal navigation policy. Scores are linear in the parameter; probabilities are nonlinear because of softmax. No neural network is needed for this example.
 Evidence: constructed example or displayed algebra, recomputed by scripts/verify-lecture.mjs. No benchmark or general improvement claim follows.
 -->
@@ -527,7 +510,7 @@ class: dense
 <PolicyPlayground />
 
 <!--
-Represent the policy. Slide 22.
+Represent the policy. Slide 21.
 First leave theta at 0: every score is 0 and every exponential is 1. The denominator is 4, so all probabilities are .25. Press Set theta = 1 at state (1,2): dx=.75, dy=.50; scores N/S/W/E are -.5,.5,-.75,.75. Follow the East numerator through the denominator to its probability. Keep theta fixed and click state (4,2): dx becomes zero, so East and West tie. The grid click changes the input; the slider changes a shared weight. This is manual model exploration, not training. The actual REINFORCE update is taught with the bandit later.
 -->
 
@@ -541,7 +524,7 @@ All three routes aim to produce a good policy. Select a route to compare what it
 <RLLandscape />
 
 <!--
-Learn from samples. Slide 23.
+Learn from samples. Slide 22.
 Source: Nan Jiang, CS 443 Policy Gradient, https://nanjiang.cs.illinois.edu/files/cs443s24/10_pg.pdf . This is a conceptual map, not an exhaustive or mutually exclusive taxonomy. Model-based methods can also use value functions and policy optimization. We do not teach Bellman backups or Q-learning updates here. Actor–critic combines an explicit actor with value prediction.
 -->
 
@@ -572,7 +555,7 @@ $$
 REINFORCE gives $\mathbb E[\hat g]=\nabla_\theta J$ under the appendix assumptions. **An update need not increase return.**
 
 <!--
-Learn from samples. Slide 24.
+Learn from samples. Slide 23.
 The hat means an estimate computed from random data. It is not an approximate-equality claim that one sample must be numerically close to the true gradient. For REINFORCE under the assumptions in the appendix, E[g-hat]=gradient J. Averaging independent samples under the same policy reduces variance. Function approximation describes the representation of pi; sampling describes how the gradient is estimated. These are two distinct uses of approximation. A gradient gives a first-order local direction; a noisy update or a large step need not improve J.
 -->
 
@@ -598,7 +581,7 @@ It is a **Monte Carlo** method: use sampled episodes to estimate an expectation.
 
 
 <!--
-Learn from samples. Slide 25.
+Learn from samples. Slide 24.
 This is the algorithm introduction, before its update formula. It needs differentiable policy probabilities and reward samples, not a differentiable environment. In the one-action example next, one episode is just one action and one reward.
 Source: Williams (1992), Simple statistical gradient-following algorithms for connectionist reinforcement learning. https://link.springer.com/article/10.1007/BF00992696
 -->
@@ -622,6 +605,32 @@ $$G_0=R_1,\qquad J(\theta)=\mathbb E_{\pi_\theta}[G_0].$$
 
 <!--
 The diagram separates the policy action choice from the environment reward draw. A gives +3 with probability .75 and -1 with probability .25. B gives +1 with probability one. Every outcome terminates. These are specified teaching rules, not empirical outcomes. No claim of training improvement follows. The learner receives sampled feedback; the class sees the model so it can verify calculations.
+-->
+
+---
+class: dense value-intro
+---
+# State value: expected return from a state
+
+The **state value** is the expected return from state $s$ when we follow policy $\pi$:
+
+$$v_\pi(s)=\mathbb E_\pi[G_0\mid S_0=s].$$
+
+Use the same bandit with $\pi(\mathrm A\mid s)=\pi(\mathrm B\mid s)=\tfrac12$. Here $G_0=R_1$.
+
+<BanditDiagram :policy-a="0.5" class="value-bandit" />
+
+$$
+v_\pi(s)=\tfrac12\underbrace{[0.75(3)+0.25(-1)]}_{\text{mean after A: }2}
++\tfrac12\underbrace{(1)}_{\text{mean after B: }1}=1.5.
+$$
+
+<p class="value-distinction"><b>One episode:</b> return 3, −1, or 1. <b>State value:</b> their expected return, 1.5.</p>
+
+<!--
+Learn from samples. Slide 26. Introduce v as the page's main concept; the small letter v matches the later value/advantage slide and Sutton–Barto notation. Define it generally, then use the preceding bandit's only decision state s. The policy is fixed: A and B each have probability .5. The figure labels the policy probabilities separately from the conditional reward probabilities. The expectation includes both sources of randomness. Under A, the mean is .75*3+.25*(-1)=2; under B it is 1. The state value is .5*2+.5*1=1.5. Equivalently, returns 3,-1,1 have probabilities .375,.125,.5. A single episode cannot return 1.5 in this example. This is exact evaluation under specified rules, not an estimated critic, learning outcome, or promise about sample averages.
+The value depends on the state and the policy. For this same state, an always-A policy has value 2 and an always-B policy has value 1, though the slide needs only the fixed equal-probability example. The general return can contain many rewards; it reduces to one only because this example ends after one decision. Later, J(theta) equals v_pi_theta(s) because every episode starts at this one fixed decision state. For a general initial distribution, J(pi)=E_{S_0~mu}[v_pi(S_0)]. The baseline section recalls the definition before introducing Q and advantage.
+Source: Nan Jiang, CS443 MDPs, printed slide 8, https://nanjiang.cs.illinois.edu/files/cs443s23/2_basic.pdf . Numerical example uses the already defined lecture bandit.
 -->
 
 ---
@@ -658,11 +667,13 @@ $$
 \qquad \bar r(\mathrm B)=1
 $$
 
-Here $G_0=R_1$, so the **expected return** is:
+Recall: $v_\pi(s)$ is the **expected return from state $s$**. For this policy:
 
 $$
-J(\theta)=\mathbb E_{\pi_\theta}[G_0]=p\cdot2+(1-p)\cdot1=1+p
+v_{\pi_\theta}(s)=p\cdot2+(1-p)\cdot1=1+p.
 $$
+
+Every episode starts at this same state, so $J(\theta)=v_{\pi_\theta}(s)$.
 
 Here $\bar r(a)=R(s,a)$. The learner receives sampled rewards.
 
@@ -1030,7 +1041,7 @@ class: dense
 ---
 # Value and advantage: compare an action with its policy
 
-The **state value** is expected return from state $s$, following policy $\pi$:
+Recall the **state value**: expected return from $s$, following $\pi$:
 
 $$v_\pi(s)=\mathbb E_\pi[G_t\mid S_t=s].$$
 

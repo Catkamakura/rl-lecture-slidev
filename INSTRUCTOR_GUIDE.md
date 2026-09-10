@@ -7,9 +7,9 @@ The deck has **48 main slides and 31 optional appendix slides**. Define the know
 | Slides | Purpose |
 |---|---|
 | 1–2 | Overview and clickable map |
-| 3–16 | MDP, policy, objective, Markov property, navigation, discounting, episodic tasks |
-| 17–22 | Recall policy; tabular probabilities; shared function approximation |
-| 23–35 | Policy gradients, bandit, REINFORCE updates, current-policy sampling |
+| 3–15 | MDP, policy, objective, Markov property, navigation, discounting, episodic tasks |
+| 16–21 | Recall policy; tabular probabilities; shared function approximation |
+| 22–35 | Policy gradients, bandit, state value, REINFORCE updates, current-policy sampling |
 | 36–41 | Trajectories, return-to-go, loss, implementation |
 | 42–43 | Baseline idea, state value, action value, advantage |
 | 44–48 | PPO motivation, sampling mismatch, ratio, clipped objective, plots |
@@ -20,19 +20,21 @@ The footer and course map use these new page numbers. Appendix links are also up
 
 **Navigation (8).** The initial model has deterministic rewards, gamma=.99, and an absorbing goal. Every action outside G costs -1, including goal entry. Subsequent actions at G stay there and earn zero. Four East and four South actions produce discounted return about -7.725531. A ninth action leaves the state and return unchanged.
 
-**Return and expectation (9–10).** Start explicitly at (3,4) with gamma=.99. All four actions are available: North moves to (3,3), South remains at (3,4), West moves to (2,4), and East reaches G. The displayed example policy assigns [1-q,0,0,q] to N/S/W/E at this state. The zero probabilities are policy choices, not action restrictions. It fixes East at (3,3) and South at (4,3). Only under this policy do the two illustrated paths have probabilities q and 1-q; a general or uniform-random policy can generate other paths. East gives return -1; North, East, South gives -2.9701. At q=.5, J=-1.98505. The page uses the already introduced expected-return objective J; values and advantages receive their own treatment later. The slider is a manual setting, not training.
+**Reward and return (9).** Compare the specified one- and three-move continuations. Both first moves receive -1; their discounted returns differ. The state-value introduction follows the bandit on slide 26.
 
-**Discounts (13–14).** Establish the geometric-series bound, then explore weighted route returns. Gamma=1 gives -8 and -12 for the routes and negative infinity for an endless loop. Slide 15 separately introduces episodic returns and the finite-expected-length condition for J=-E[T].
+**Discounts (12–13).** Establish the geometric-series bound, then explore weighted route returns. Gamma=1 gives -8 and -12 for the routes and negative infinity for an endless loop. Slide 14 separately introduces episodic returns and the finite-expected-length condition for J=-E[T].
 
-**Two complete policies (18).** Uniform random assigns [.25,.25,.25,.25] to N/S/W/E at every nonterminal state. Always East assigns [0,0,0,1]. Choose a policy, then click different cells: the policy stays active. Clicking a cell resets the episode state, counters, and path only. Take one action samples from the displayed distribution. The ten-action button stops after ten actions or on reaching G. Always East from (0,0) reaches (4,0) and then stays against the boundary; from (3,4), it reaches G in one action. Reaching G ends the episode and disables stepping. The restart button preserves the chosen policy. These are fixed teaching policies, not learning updates; random trajectories can differ between runs.
+**Two complete policies (17).** Uniform random assigns [.25,.25,.25,.25] to N/S/W/E at every nonterminal state. Always East assigns [0,0,0,1]. Choose a policy, then click different cells: the policy stays active. Clicking a cell resets the episode state, counters, and path only. Take one action samples from the displayed distribution. The ten-action button stops after ten actions or on reaching G. Always East from (0,0) reaches (4,0) and then stays against the boundary; from (3,4), it reaches G in one action. Reaching G ends the episode and disables stepping. The restart button preserves the chosen policy. These are fixed teaching policies, not learning updates; random trajectories can differ between runs.
 
-**Table size and continuous states (19).** Compare 24 nonterminal rows in the 5×5 grid with 9,999 in a 100×100 grid. At four stored probabilities per row, these require 96 and 39,996 entries. The continuous-position comparison shows why no finite table can enumerate every state. Discretization groups positions into bins; a shared model computes probabilities from features. Continuous states do not force approximation error in every problem: a constant action policy can be represented exactly. The continuous row is a representation comparison, not a new transition model.
+**Table size and continuous states (18).** Compare 24 nonterminal rows in the 5×5 grid with 9,999 in a 100×100 grid. At four stored probabilities per row, these require 96 and 39,996 entries. The continuous-position comparison shows why no finite table can enumerate every state. Discretization groups positions into bins; a shared model computes probabilities from features. Continuous states do not force approximation error in every problem: a constant action policy can be represented exactly. The continuous row is a representation comparison, not a new transition model.
 
-**Full grid-policy table (20).** Start with Uniform random. Click (1,2): its row highlights in the left table. Set this row to always East, then click (2,2): the edited row retains [0,0,0,1] while the neighboring row retains [.25,.25,.25,.25]. Only the complete-table buttons reset all entries. The terminal G has no action row. This is a manual illustration of independent table entries, not training. Contrast it with shared weights that can change probabilities at many states. The simple grid does not require function approximation, and the two constant example policies can also be represented by exact short rules. A chosen shared model may fail to express an optimal policy; beneficial generalization is not guaranteed.
+**Full grid-policy table (19).** Start with Uniform random. Click (1,2): its row highlights in the left table. Set this row to always East, then click (2,2): the edited row retains [0,0,0,1] while the neighboring row retains [.25,.25,.25,.25]. Only the complete-table buttons reset all entries. The terminal G has no action row. This is a manual illustration of independent table entries, not training. Contrast it with shared weights that can change probabilities at many states. The simple grid does not require function approximation, and the two constant example policies can also be represented by exact short rules. A chosen shared model may fail to express an optimal policy; beneficial generalization is not guaranteed.
 
-**Shared policy (21–22).** First read the feature, score, and softmax equations. At theta=0, all action probabilities are .25. At state (1,2), theta=1 gives dx=.75, dy=.50, scores [-.5,.5,-.75,.75], and East probability about .436979. Select another state to change the input; move theta to change a shared parameter. The arrows use the same scale as the tabular demonstration. This hand-designed policy family is not claimed to contain an optimal navigation policy.
+**Shared policy (20–21).** First read the feature, score, and softmax equations. At theta=0, all action probabilities are .25. At state (1,2), theta=1 gives dx=.75, dy=.50, scores [-.5,.5,-.75,.75], and East probability about .436979. Select another state to change the input; move theta to change a shared parameter. The arrows use the same scale as the tabular demonstration. This hand-designed policy family is not claimed to contain an optimal navigation policy.
 
-**Bandit visual (26).** Separate policy choice from reward randomness. The policy chooses A or B. After A, the environment draws +3 with probability .75 or -1 with probability .25. After B, the reward is always +1. All outcomes terminate. These stipulated rules let the class verify the expected return and update arithmetic.
+**Bandit visual (25).** Separate policy choice from reward randomness. The policy chooses A or B. After A, the environment draws +3 with probability .75 or -1 with probability .25. After B, the reward is always +1. All outcomes terminate. These stipulated rules let the class verify the expected return and update arithmetic.
+
+**State value (26).** Define v_pi(s) as expected return from s under pi. Reuse the preceding one-decision bandit with pi(A|s)=pi(B|s)=.5. The conditional reward means are 2 and 1, giving v_pi(s)=1.5. One episode returns 3, -1, or 1; 1.5 is the expectation. This is a fixed illustration, not training. Slide 28 connects J(theta) to v_pi_theta(s) because the start state is fixed; slide 43 recalls value before defining advantage.
 
 **Exploration (27).** The sigmoid policy controls the expected action counts. At theta=0, p(A)=.5. Favor A sets theta=4.6, so p(A) is about .990. Counts are expected counts in 100 episodes, not an actual rollout.
 
@@ -46,13 +48,13 @@ The footer and course map use these new page numbers. Appendix links are also up
 
 Slide 42 introduces a fixed state-only baseline in the return-to-go estimator. It preserves the expected gradient. A suitable baseline can reduce gradient-estimate variance; an arbitrary baseline need not help. Hold baseline outputs fixed in the actor derivative. Fixing the baseline before collecting the batch is sufficient for the stated unbiasedness result; strict finite-sample claims need care if the baseline is fitted using the same action/reward being centered.
 
-Slide 43 defines v_pi(s) as expected return starting from s and following pi. Q_pi(s,a) takes a first, then follows pi. Advantage is Q-v. The actor chooses actions; the critic V_phi predicts expected return and can supply the baseline. No numerical example is needed here.
+Slide 43 recalls v_pi(s), introduced on slide 26: expected return starting from s and following pi. Q_pi(s,a) takes a first, then follows pi. Advantage is Q-v. The actor chooses actions; the critic V_phi predicts expected return and can supply the baseline. No numerical example is needed here.
 
 Slide 47 uses hat-A to mean an estimate of the collecting policy's advantage. For complete episodes, G_t-V_phi(s_t) is one simple estimator. It is not necessarily the true advantage. PPO commonly uses GAE; its residual formula is in the appendix. Keep advantage estimates and the old-policy denominator fixed during the optimization passes.
 
 ## Mathematical distinctions to preserve
 
-- The initial MDP tuple is (S,A,P,R,gamma), with deterministic R and gamma<1. Episodic and random-reward extensions appear on 15 and 26.
+- The initial MDP tuple is (S,A,P,R,gamma), with deterministic R and gamma<1. Episodic and random-reward extensions appear on 14 and 25.
 - G_t is sampled return; J is expected return; g-hat estimates the gradient of J. A sample update need not improve return.
 - Basic REINFORCE's uncorrected estimator requires current-policy sampling. Old trajectories retain their collection distribution after theta changes.
 - Return-to-go removes past rewards because their expected score contribution is zero. This is not an equality between individual sampled gradients.

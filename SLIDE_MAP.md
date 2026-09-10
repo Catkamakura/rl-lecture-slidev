@@ -13,23 +13,23 @@
 | 7 | The Markov property |
 | 8 | Example: instantiate the navigation MDP |
 | 9 | Example: reward and return compare different quantities |
-| 10 | Example: expected return under a stochastic policy |
-| 11 | Example: different histories, the same prediction |
-| 12 | Example: when position is not a sufficient state |
-| 13 | Why discounting makes the return well-defined |
-| 14 | Example: apply the discount weights |
-| 15 | Episodic tasks: stop at a terminal state |
-| 16 | Example: choose a reward that matches the task |
-| 17 | How can we represent a policy? |
-| 18 | A tabular policy stores one distribution per state |
-| 19 | What happens when the grid becomes finer? |
-| 20 | The grid's policy table: what could we share? |
-| 21 | Specify the model before moving its parameter |
-| 22 | One shared model produces the action probabilities |
-| 23 | Where do policy gradients fit in RL? |
-| 24 | Policy gradients: objective, estimator, and update |
-| 25 | Episodic REINFORCE: the algorithm |
-| 26 | One decision, two actions, then a reward |
+| 10 | Example: different histories, the same prediction |
+| 11 | Example: when position is not a sufficient state |
+| 12 | Why discounting makes the return well-defined |
+| 13 | Example: apply the discount weights |
+| 14 | Episodic tasks: stop at a terminal state |
+| 15 | Example: choose a reward that matches the task |
+| 16 | How can we represent a policy? |
+| 17 | A tabular policy stores one distribution per state |
+| 18 | What happens when the grid becomes finer? |
+| 19 | The grid's policy table: what could we share? |
+| 20 | Specify the model before moving its parameter |
+| 21 | One shared model produces the action probabilities |
+| 22 | Where do policy gradients fit in RL? |
+| 23 | Policy gradients: objective, estimator, and update |
+| 24 | Episodic REINFORCE: the algorithm |
+| 25 | One decision, two actions, then a reward |
+| 26 | State value: expected return from a state |
 | 27 | The policy controls both actions and data collection |
 | 28 | The known reward rules let us check the objective |
 | 29 | The one-action REINFORCE update |

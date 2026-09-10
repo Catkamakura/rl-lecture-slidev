@@ -1,5 +1,7 @@
 # Revision: policy visuals and a shorter bridge to PPO
 
+**Latest:** the former page 10 is replaced by a simpler state-value introduction on page 26, after the bandit. Previous pages 11–26 shift down by one; pages 27–79 keep their numbers. The current [slide map](SLIDE_MAP.md) and navigation reflect this move. Earlier entries below record the numbering at the time of each revision.
+
 Updated 2026-09-10 from source commit `64ee865`. Old page numbers below refer to the instructor's comments. The deck now has 48 main slides and 31 appendix slides.
 
 | Previous page | Current page | Change |
@@ -60,3 +62,10 @@ The original example assigned q and 1-q to East and North without explicitly lis
 The return arithmetic is unchanged: -1 and -2.9701 at gamma=.99, averaging to -1.98505 at q=.5. The page now explicitly fixes the starting state and uses the previously introduced J objective, leaving state-value terminology to the later value/advantage section. Source: [CS443 MDPs, printed slides 5 and 8](https://nanjiang.cs.illinois.edu/files/cs443s23/2_basic.pdf), plus direct calculation under the stipulated policy.
 
 Verification checked all four next states and all 21 slider settings, including q=0 and q=1. Table probabilities, arrow probabilities, and the expected-return calculation agree. Slides 9–11 render without equation errors or overlap with the navigation bar. The public payload omits presenter notes.
+
+
+## State value introduction restored on page 26
+
+The page now has one purpose: define v_pi(s), then evaluate it in the already introduced bandit. Under a fixed policy choosing A and B equally, its value is .5[.75(3)+.25(-1)]+.5(1)=1.5. The possible sampled returns remain 3, -1, and 1. The old grid slider and its policy restrictions have been removed. Page 28 connects the state value to J for the single fixed start state; page 43 recalls it before introducing advantage. Source: CS443 MDPs, printed slide 8; all numerical values follow the lecture's stipulated bandit.
+
+Verification: numerical checks passed. Browser checks covered 21 affected or connected slides, verified the fixed 0.50/0.50 policy labels on slide 26, retained the general policy labels on slide 25, and tested all section links and the 25→26→27 order. No equation errors, broken assets, or navigation overlap were detected. The deck remains 79 slides (48 main and 31 appendix).
