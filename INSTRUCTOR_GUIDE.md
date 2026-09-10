@@ -1,115 +1,86 @@
-# Teaching guide: RL foundations → REINFORCE → PPO
+# Teaching guide: RL foundations, REINFORCE, and PPO
 
-## Claim audit
+The deck has **49 main slides and 31 optional appendix slides**. Define the knowledge first, then use examples to apply it. The navigation model illustrates MDPs. The bandit demonstrates REINFORCE. Baselines occupy two slides without a numerical demonstration.
 
-See [MDP_SOURCE_MAP.md](MDP_SOURCE_MAP.md) for the current MDP sequence and assumptions. [CLAIM_AUDIT.md](CLAIM_AUDIT.md) preserves the earlier correction register; its MDP coverage is superseded by the source map. Outcome descriptions are limited to exact examples or the disclosed seeded run. An unbiased gradient is not a policy-improvement guarantee. Use plain SGD when illustrating the exact θ + α ĝ step.
+## Teaching sequence
 
-## Teaching structure
+| Slides | Purpose |
+|---|---|
+| 1–2 | Overview and clickable map |
+| 3–17 | MDP, policy, objective, Markov property, navigation, discounting, episodic tasks |
+| 18–23 | Recall policy; tabular probabilities; shared function approximation |
+| 24–36 | Policy gradients, bandit, REINFORCE updates, current-policy sampling |
+| 37–42 | Trajectories, return-to-go, loss, implementation |
+| 43–44 | Baseline idea, state value, action value, advantage |
+| 45–49 | PPO motivation, sampling mismatch, ratio, clipped objective, plots |
 
-The MDP definition, policy, objective, and Markov property come first (slides 3–7). Navigation then demonstrates their consequences (8–14). Slides 15–17 introduce episodic tasks and the learning problem. Later, define the gradient estimator before working its bandit example. Return to that bandit for baselines.
+The footer and course map use these new page numbers. Appendix links are also updated. REINFORCE remains the main worked algorithm; the proofs are optional reference material.
 
-| Slides | Purpose | Suggested time in a 90-minute class |
-|---|---|---:|
-| 1–2 | Course map | 2 min |
-| 3–17 | Formal MDP, RL feedback, objective, Markov, reward and discount choices | 20 min |
-| 18–23 | Policy representation and function approximation | 10 min |
-| 24–36 | RL landscape, exploration, sampled REINFORCE, on-policy data | 22 min |
-| 37–44 | Trajectories, return-to-go, implementation | 14 min |
-| 45–52 | Baseline recap, variance math, critic | 12 min |
-| 53–59 | PPO at a high level | 7 min |
-| 60–61 | Project path and discussion | 3 min |
+## Demonstrations
 
-These are pacing estimates, not a one-slide-per-minute rule. Some transitions take seconds; demos and worked calculations need time. In a shorter class, assign the loss/code pair and optional PPO details as reading. Keep the formal objective, one-sample calculation, return-to-go, and baseline calculation in class. The appendix is a reference rather than part of the timed lecture.
+**Navigation (8).** The initial model has deterministic rewards, gamma=.99, and an absorbing goal. Every action outside G costs -1, including goal entry. Subsequent actions at G stay there and earn zero. Four East and four South actions produce discounted return about -7.725531. A ninth action leaves the state and return unchanged.
 
-## Earlier structure revision
+**Return and expectation (9–10).** Starting at (3,4), East gives -1; North, East, South gives -2.9701 at gamma=.99. The specified stationary policy chooses these continuations with probabilities q and 1-q. At q=.5, expected return is -1.98505. The slider is a manual setting, not training.
 
-- Added a clickable overview, section recaps, a persistent section/progress bar, and a linked appendix index.
-- Added an explicit contrast between RL feedback and supervised action labels. Distinguished planning with a known model from learning through samples.
-- Added a selectable RL landscape. It introduces neighboring methods without teaching their update rules.
-- Turned the sigmoid-policy table into an exploration demonstration with the same visible model equation.
-- Added the variance definition, outcome probabilities, exact live arithmetic, and the independent-batch variance relation.
-- Combined the two discount-motivation slides. Removed the repeated early return table and folded the credit-assignment caution into return-to-go.
-- Moved the full batch-algorithm specification to Appendix G; retained the practical loss and code in the main lecture.
-- Removed the repeated grid-policy appendix and repeated numerical variance appendix. The model and variance calculations now appear where used.
-- Replaced the closing question wall with six selectable questions and answer reveals.
+**Discounts (13–14).** Establish the geometric-series bound, then explore weighted route returns. Gamma=1 gives -8 and -12 for the routes and negative infinity for an endless loop. Slide 15 separately introduces episodic returns and the finite-expected-length condition for J=-E[T].
 
-The deck has 61 main slides and 31 optional appendix/reference slides. The extra structure replaces repetition rather than adding another algorithm lecture.
+**Tabular policy (19).** Select a cell. The arrows and table show its probabilities in North/South/West/East order. The initial row at (1,2) is [.1,.2,.1,.6]; other nonterminal rows are uniform. Select (2,2), choose Favor East, then return to (1,2). Each state retains its own row. Uniform row changes only the selected row. Reset restores the initial table. Goal G is terminal and has no selectable action row. Darker arrows mean higher probabilities; labels provide numeric values. The controls manually edit the policy.
 
-## Navigation and figures
+**Shared policy (22–23).** First read the feature, score, and softmax equations. At theta=0, all action probabilities are .25. At state (1,2), theta=1 gives dx=.75, dy=.50, scores [-.5,.5,-.75,.75], and East probability about .436979. Select another state to change the input; move theta to change a shared parameter. The arrows use the same scale as the tabular demonstration. This hand-designed policy family is not claimed to contain an optimal navigation policy.
 
-The footer shows the current section and its progress. Map opens slide 2. The six cards jump to the section starts. Compact maps on transition slides highlight the next question and are also clickable. Slidev's original hover controls are at the upper right so they do not cover the course navigation. Arrow-key navigation and presenter notes still work.
+**Bandit visual (27).** Separate policy choice from reward randomness. The policy chooses A or B. After A, the environment draws +3 with probability .75 or -1 with probability .25. After B, the reward is always +1. All outcomes terminate. These stipulated rules let the class verify the expected return and update arithmetic.
 
-Slide 24 defaults to policy gradients. Select the other routes to compare the intermediate object being learned: a model, action values, or policy parameters. These are overlapping ideas, not an exhaustive partition. Actor–critic adds value prediction to policy optimization; model-based systems can also use actors and critics.
+**Exploration (28).** The sigmoid policy controls the expected action counts. At theta=0, p(A)=.5. Favor A sets theta=4.6, so p(A) is about .990. Counts are expected counts in 100 episodes, not an actual rollout.
 
-## Demo results and teaching prompts
+**One update (32).** Each outcome button starts from theta=0 and alpha=.4. A/+3 gives gradient 1.5, theta_new=.6, and p(A) about .645656. A/-1 and B/+1 each give gradient -.5, theta_new=-.2, and p(A) about .450166. These compare possible samples rather than successive updates.
 
-**Navigation, slide 8.** The opening model uses CS443’s deterministic reward function and gamma=.99. Every move outside G costs -1, including goal entry. G is absorbing: subsequent actions stay there with reward zero. Four East and four South actions yield a discounted sum of about -7.725531. A ninth action leaves the state and sum unchanged.
+**Sampled updates (34).** Batch size 64, alpha=.4, seed 443. After 40 batches, p(A) is approximately .931658. The learner uses sampled rewards. The analytical expected return 1+p is for evaluation only. One seeded run does not establish reliable or monotonic improvement.
 
-**Return and expectation, slides 9–10.** Start at (3,4). East gives -1; North, East, South gives -2.9701 at gamma=.99. Set q=.5 to average these returns to -1.98505. The q slider manually changes the stipulated policy. The definition of state value precedes this calculation.
+**PPO clipping (49).** First read the ratio (47), then the exact clipped surrogate and advantage estimate (48). The positive-advantage plot is flat above ratio 1.2; the negative-advantage plot is flat below ratio 0.8. Other samples and shared parameters can still move a ratio beyond these thresholds. Clipping changes the objective's incentive; it does not impose a hard trust region.
 
-**Discounting, slides 13–14.** First establish the geometric-series bound. Then apply it to the route display, initially at gamma=.99. The no-discount endpoint shows the boundary case: -8, -12, and negative infinity. Slide 15 separately introduces finite expected episodic returns with gamma=1; only then use J=-E[T].
+## Baseline and advantage explanations
 
-**Shared policy, slide 23.** At theta=0, probabilities are all .25. At state (1,2), Set θ=1 gives features dx=.75, dy=.50 and scores [−.50, .50, −.75, .75] for N/S/W/E. Exponentiate and normalize to obtain probabilities; East is about .436979. Selecting another cell changes inputs; the slider changes shared weights. This is a restricted toy model, not a trained navigation controller. Function approximation supports generalization across states. It does not restore hidden information automatically.
+Slide 43 introduces a fixed state-only baseline in the return-to-go estimator. It preserves the expected gradient. A suitable baseline can reduce gradient-estimate variance; an arbitrary baseline need not help. Hold baseline outputs fixed in the actor derivative. Fixing the baseline before collecting the batch is sufficient for the stated unbiasedness result; strict finite-sample claims need care if the baseline is fitted using the same action/reward being centered.
 
-**Exploration, slide 28.** Theta=0 gives p(A)=.5 and 50 expected selections of each action per 100 episodes. Favor A sets theta=4.6 and p(A)≈.990; B receives only about one expected selection. Expected counts are 100*pi(a), not actual sampled counts. No learning takes place in this slider. The learner only sees rewards for chosen actions, so probabilities control data coverage as well as current performance. Nonzero probabilities alone do not ensure adequate exploration.
+Slide 44 defines v_pi(s) as expected return starting from s and following pi. Q_pi(s,a) takes a first, then follows pi. Advantage is Q-v. The actor chooses actions; the critic V_phi predicts expected return and can supply the baseline. No numerical example is needed here.
 
-**One update, slide 32.** Every button restarts at theta=0 and alpha=.4. They compare possible observations, not sequential updates. A/+3 gives gradient 1.5, new theta .6, and p(A)≈.645656. A/−1 and B/+1 each give gradient −.5, new theta −.2, and p(A)≈.450166. One episode can point away from the better action. The estimate is correct in expectation, not necessarily close on each sample.
+Slide 48 uses hat-A to mean an estimate of the collecting policy's advantage. For complete episodes, G_t-V_phi(s_t) is one simple estimator. It is not necessarily the true advantage. PPO commonly uses GAE; its residual formula is in the appendix. Keep advantage estimates and the old-policy denominator fixed during the optimization passes.
 
-**Seeded update demonstration, slide 34.** Each batch contains 64 fresh one-action episodes under fixed parameters; alpha=.4, seed=443. After 40 batches, p(A)≈.931658. The learner only uses sampled actions, observed rewards, and policy derivatives. The curve shows the sampled updates’ p(A). The separate numeric expected reward is calculated analytically as 1 + p and is not an input to learning. The reproduced curve describes one seed only. It does not establish reliable or monotonic improvement.
+## Mathematical distinctions to preserve
 
-**Baseline variance, slides 46–50.** Reset to the same bandit, theta=0. Its three action–reward outcomes have probabilities .375, .125, .5. Uncentered gradients are 1.5, −.5, −.5, with mean .25. The definition on slide 48 explains each column in slide 49.
-
-| Baseline | Gradients for A/+3, A/−1, B/+1 | Mean | Variance |
-|---:|---|---:|---:|
-| 0 | 1.5, −.5, −.5 | .25 | .9375 |
-| 1.5 | .75, −1.25, .25 | .25 | .375 |
-| 4 | −.5, −2.5, 1.5 | .25 | 1.9375 |
-
-At b=0, variance is .375(1.5−.25)^2 + .125(−.5−.25)^2 + .5(−.5−.25)^2 = .9375. At b=1.5, it is .375(.75−.25)^2 + .125(−1.25−.25)^2 + .5(.25−.25)^2 = .375. Ask students to predict the effect before moving the slider. b=4 demonstrates that an arbitrary baseline need not help.
-
-For N independent episodes at fixed theta and a fixed baseline, the batch-mean variance is single-episode variance/N. The 60% reduction in this example describes gradient variance at the same data budget, not a guaranteed improvement in learning speed or final reward. Subtracting a constant does not reduce the variance of rewards alone. It changes the variance of the product (G−b)*score because the score depends on the action.
-
-**PPO clipping, slide 57.** With positive advantage +1, moving the ratio above 1.2 leaves the clipped score at 1.2. With negative advantage −1, moving below .8 leaves it at −.8. Moving in the harmful direction still worsens the objective. Clipping changes incentives; it does not impose a hard bound on realized probabilities or guarantee policy improvement.
-
-**Review, slide 61.** Select a question, ask for an explanation, then reveal the answer. Switching questions hides the previous answer. Students should connect the objective, policy parameters, estimator, baseline, and data distribution in their own words.
-
-## Important mathematical distinctions
-
-- The opening tuple (S,A,P,R,gamma) follows CS443: deterministic R, infinite horizon, gamma<1. Specify a start distribution for evaluation. The episodic and stochastic-reward extensions are introduced explicitly on slides 15 and 27. Appendix B relates the joint kernel p to P and R.
-- G_t is return data, J(theta) is expected performance, and g-hat estimates a parameter gradient. The learning examples use complete finite episodes and gamma=1.
-- REINFORCE differentiates the policy. It does not require a differentiable environment or a known transition model. The derivation assumes the environment has no direct dependence on theta.
-- Basic REINFORCE's uncorrected expectation is under the current policy. After an update, the old batch retains the old sampling frequencies. Recomputing log-probability derivatives does not change those frequencies.
-- In the old-p=.5/new-p=.8 bandit example, the unweighted old-data gradient has mean −.20 while the correct current-policy gradient is +.16. Action importance weights 1.6 and .4 restore +.16 in this one-state case.
-- A fixed state-only baseline has zero expected score contribution. Hold it fixed in the actor derivative. Fitting a baseline from the very same sampled action/reward can require care for strict finite-sample unbiasedness.
-- A value predictor fitted to complete returns is a Monte Carlo baseline and can have prediction error. The PPO paper’s actor–critic algorithm also uses value predictions to estimate advantages; bootstrapping is introduced in the appendix.
-- PPO's action ratio is an importance-sampling weight inside a local surrogate. It does not fully correct changed state visitation or make a batch valid forever. Full-trajectory importance sampling requires a product of action ratios.
-- TRPO introduced a KL-constrained approach in 2015. The 2017 PPO paper includes clipping and an adaptive KL-penalty variant. A fixed-reference KL penalty in later RLHF applications serves a different role from comparison with the recent collecting policy.
-- For the exact start-state discounted objective, the return-to-go gradient includes an outer gamma^t. See Appendix D; do not silently omit it when switching objectives.
+- The initial MDP tuple is (S,A,P,R,gamma), with deterministic R and gamma<1. Episodic and random-reward extensions appear on 15 and 27.
+- G_t is sampled return; J is expected return; g-hat estimates the gradient of J. A sample update need not improve return.
+- Basic REINFORCE's uncorrected estimator requires current-policy sampling. Old trajectories retain their collection distribution after theta changes.
+- Return-to-go removes past rewards because their expected score contribution is zero. This is not an equality between individual sampled gradients.
+- The negative weighted log loss constructs the policy gradient. Its scalar value does not measure expected return. Plain SGD implements theta+alpha*g-hat; other optimizers change the step rule.
+- PPO uses an action importance ratio in a surrogate over old state samples. It does not fully correct trajectory distributions. Clipping is not an unbiased estimator of the new policy's return.
+- For the start-state discounted objective, the return-to-go gradient includes an outer gamma^t. See Appendix D.
 
 ## Appendix map
 
 | Slides | Material |
 |---|---|
-| 62 | Clickable topic index |
-| 63–65 | Conditional expectation and total expectation |
-| 66–69 | One-action REINFORCE, observed rewards, sigmoid derivatives |
-| 70–72 | Trajectory distribution and gradient |
-| 73–79 | Baseline cancellation, variance, action restriction, return-to-go |
-| 80–81 | Discounted gradients and effective horizon |
-| 82–85 | Importance sampling and the PPO surrogate |
-| 86–89 | PPO clipping, KL controls, fixed references, GAE |
-| 90 | Complete batch REINFORCE specification |
-| 91–92 | Notation and sources |
+| 50 | Clickable topic index |
+| 51–53 | Conditional expectation and total expectation |
+| 54–57 | One-action REINFORCE and sigmoid derivatives |
+| 58–60 | Trajectory probability and gradient |
+| 61–67 | Baseline cancellation, variance, restrictions, return-to-go |
+| 68–69 | Discounted gradients and effective horizon |
+| 70–73 | Importance sampling and PPO's surrogate |
+| 74–77 | PPO clipping, KL methods, fixed references, GAE |
+| 78 | Batch REINFORCE algorithm |
+| 79–80 | Notation and sources |
 
-The probability refresher uses the same bandit: conditional means 2 and 1 become the overall mean 1+p by averaging over actions. Total expectation does not require independence. In the sampled-reward proof, condition on the action, then take its fixed log-probability gradient outside the inner expectation.
+The detailed baseline proof and variance calculation remain in Appendix C. KL constraints, PPO's adaptive KL penalty, and later fixed-reference penalties remain in Appendix F. They are not additional main-lecture topics.
 
-## Sources
+## Sources and verification
 
-- [Nan Jiang, CS 443](https://nanjiang.cs.illinois.edu/cs443/), especially the MDP, function-approximation, and [policy-gradient slides](https://nanjiang.cs.illinois.edu/files/cs443s24/10_pg.pdf).
-- [Sutton and Barto, Reinforcement Learning](https://www.incompleteideas.net/book/the-book-2nd.html), chapters 2, 3, and 13.
-- [Williams, REINFORCE (1992)](https://link.springer.com/article/10.1007/BF00992696).
-- [ProbabilityCourse, conditional expectation](https://www.probabilitycourse.com/chapter5/5_1_5_conditional_expectation.php).
-- Schulman et al., [TRPO (2015)](https://arxiv.org/abs/1502.05477), [PPO (2017)](https://arxiv.org/abs/1707.06347), and [GAE](https://arxiv.org/abs/1506.02438).
-- Ouyang et al., [RL from human feedback (2022)](https://arxiv.org/abs/2203.02155), optional reference-policy context.
+- [MDP_SOURCE_MAP.md](MDP_SOURCE_MAP.md): MDP formulation and example assumptions.
+- [REVISION_NOTES.md](REVISION_NOTES.md): latest page edits and verification scope.
+- [CLAIM_AUDIT.md](CLAIM_AUDIT.md): historical claim corrections, using its original page numbers.
+- [CS443](https://nanjiang.cs.illinois.edu/cs443/) and [policy-gradient lecture](https://nanjiang.cs.illinois.edu/files/cs443s24/10_pg.pdf).
+- [Sutton and Barto](https://www.incompleteideas.net/book/the-book-2nd.html), Chapters 3 and 13.
+- [Spinning Up policy optimization](https://spinningup.openai.com/en/latest/spinningup/rl_intro3.html): return-to-go, baseline and advantage identities.
+- [PPO paper](https://arxiv.org/abs/1707.06347), Eq. 7 and Algorithm 1: clipped objective and rollout reuse.
 
-Detailed assumptions and teaching prompts remain in each slide's presenter notes.
+Run `node scripts/verify-lecture.mjs` for the numerical checks. Presenter notes remain in the private source and local build. The public Pages build omits them.

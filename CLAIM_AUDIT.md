@@ -1,6 +1,6 @@
 # Lecture claim audit
 
-**Historical snapshot.** The subsequent [MDP revision](MDP_SOURCE_MAP.md) follows CS443’s deterministic-reward definition and supersedes this document’s MDP coverage and joint-kernel opening. The prior correction record below is retained for traceability.
+**Historical snapshot.** The subsequent [MDP revision](MDP_SOURCE_MAP.md) follows CS443’s deterministic-reward definition and supersedes this document’s MDP coverage and joint-kernel opening. The prior correction record below is retained for traceability. Page numbers refer to that earlier version; see [REVISION_NOTES.md](REVISION_NOTES.md) for the current shortened lecture.
 
 Audited on 2026-09-10 against source commit `f1373507c422951db08a47ea9a9c3b5b29512426`.
 

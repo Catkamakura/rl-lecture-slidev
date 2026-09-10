@@ -1,6 +1,6 @@
 # RL lecture in Slidev
 
-**92 slides: 61 main lecture slides and 31 optional appendix/reference slides.**
+**80 slides: 49 main lecture slides and 31 optional appendix/reference slides.**
 
 The lecture defines the MDP and objective, introduces policy representations, demonstrates REINFORCE, and builds a short bridge through baselines and critics to PPO. REINFORCE remains the main worked algorithm.
 
@@ -45,7 +45,7 @@ Open the URL printed in the terminal. The included `dist/` build runs locally wi
 
 ## Verification and claim audit
 
-[MDP_SOURCE_MAP.md](MDP_SOURCE_MAP.md) documents the current CS443-based MDP section. [CLAIM_AUDIT.md](CLAIM_AUDIT.md) preserves the earlier claim corrections. Run `node scripts/verify-lecture.mjs` to recompute the examples. This audit and presenter notes stay in the private source; the public build contains the lecture only.
+[REVISION_NOTES.md](REVISION_NOTES.md) maps the latest requested edits to their new pages and sources. [MDP_SOURCE_MAP.md](MDP_SOURCE_MAP.md) documents the current CS443-based MDP section. [CLAIM_AUDIT.md](CLAIM_AUDIT.md) preserves the earlier claim corrections. Run `node scripts/verify-lecture.mjs` to recompute the examples. This audit and presenter notes stay in the private source; the public build contains the lecture only.
 
 ## Interactive teaching material
 
@@ -55,14 +55,13 @@ Open the URL printed in the terminal. The included `dist/` build runs locally wi
 | 8 | Navigate the discounted grid, including the absorbing goal |
 | 10 | Vary a specified policy and calculate its expected return |
 | 14 | Change gamma and inspect weighted route rewards |
-| 23 | Follow state features → scores → softmax probabilities |
+| 19 | Select a grid state; inspect and edit its policy row with shaded action arrows |
+| 23 | Follow state features, scores, and softmax probabilities with the same arrow display |
 | 24 | Compare model-based, value-based, and policy-gradient routes |
 | 28 | Change theta and see expected action counts for exploration |
 | 32 | Calculate three possible sampled REINFORCE updates |
 | 34 | Run actual sampled REINFORCE training |
-| 49 | Change the baseline; follow the variance formula and arithmetic |
-| 57 | Compare clipping with positive and negative advantages |
-| 61 | Discuss review questions and reveal answers |
+| 49 | Compare clipping with positive and negative advantages |
 
 ## Edit
 

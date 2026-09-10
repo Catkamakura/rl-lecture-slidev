@@ -40,12 +40,10 @@ const eastCalculation = computed(() => `\\frac{${model.value.exponentials[3].toF
     <section class="policy-bars">
       <h3>3. Normalize → probabilities</h3>
       <p class="softmax-formula"><MathInline tex="\pi_\theta(a\mid s)=\frac{e^{z_a}}{\sum_b e^{z_b}}" /></p>
-      <div v-for="(name,i) in names" :key="name" class="prob-row"><span>{{name}}</span><div class="bar-track"><div :style="{width:100*model.probabilities[i]+'%'}"></div></div><strong :data-action="name">{{model.probabilities[i].toFixed(3)}}</strong></div>
+      <PolicyArrows :probabilities="model.probabilities" :state="[x,y]" :size="220" />
       <p class="east-worked">East: <MathInline :tex="eastCalculation" /></p>
-      <p class="small-note">Probabilities sum to 1.<br>Displayed values are rounded.</p>
     </section>
   </div>
-  <p class="interaction-hint">Manual exploration: θ sets the shared weight. A cell click sets the input state.</p>
 </div>
 </template>
 <style scoped>

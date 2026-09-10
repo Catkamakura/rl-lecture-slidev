@@ -49,7 +49,6 @@ Use this map to preview the argument. Define each concept first, then use the ex
 ---
 class: dense
 ---
-
 # A Markov decision process
 
 We begin with the **infinite-horizon discounted MDP** used in CS443:
@@ -80,7 +79,6 @@ Source: Nan Jiang, CS443 MDPs, printed slides 2–3, https://nanjiang.cs.illinoi
 ---
 class: dense
 ---
-
 # How an MDP generates experience
 
 At time $t$, the agent sees $S_t$ and chooses $A_t$. The model then specifies:
@@ -104,7 +102,6 @@ Source: Nan Jiang, CS443 MDPs, printed slides 2, https://nanjiang.cs.illinois.ed
 ---
 class: dense
 ---
-
 # A policy specifies the action choice
 
 A **deterministic policy** maps a state to an action: $\pi:\mathcal S\to\mathcal A$.
@@ -132,7 +129,6 @@ Source: Nan Jiang, CS443 MDPs, printed slides 8, https://nanjiang.cs.illinois.ed
 ---
 class: dense
 ---
-
 # The objective: maximize expected discounted return
 
 The **reward** $R_{t+1}$ scores one transition. The **return** counts the rewards from time $t$ onward:
@@ -162,7 +158,6 @@ Source: Nan Jiang, CS443 MDPs, printed slides 2, 8, https://nanjiang.cs.illinois
 ---
 class: dense
 ---
-
 # The Markov property
 
 Let $H_t=(S_0,A_0,R_1,\ldots,S_t)$ be the history before action $A_t$.
@@ -188,7 +183,6 @@ Source: Nan Jiang, CS443 MDPs, printed slides 21–22, https://nanjiang.cs.illin
 ---
 class: dense
 ---
-
 # Example: instantiate the navigation MDP
 
 The grid below illustrates the preceding definition, using CS443’s navigation rules.
@@ -218,7 +212,6 @@ Source: Nan Jiang, CS443 MDPs, printed slides 5, https://nanjiang.cs.illinois.ed
 ---
 class: dense
 ---
-
 # Example: reward and return compare different quantities
 
 The reward scores the next move. Return includes the continuation. Use $\gamma=0.99$ and start at $(3,4)$:
@@ -240,7 +233,6 @@ Source: Nan Jiang, CS443 MDPs, printed slides 5, 8, https://nanjiang.cs.illinois
 ---
 class: dense
 ---
-
 # Example: expected return under a stochastic policy
 
 The **state value** averages returns when the policy starts from a given state:
@@ -261,7 +253,6 @@ Source: Nan Jiang, CS443 MDPs, printed slides 8, https://nanjiang.cs.illinois.ed
 ---
 class: dense
 ---
-
 # Example: different histories, the same prediction
 
 The Markov condition says that history adds no information once the current state and action are given.
@@ -285,7 +276,6 @@ Source: Nan Jiang, CS443 MDPs, printed slides 5, 21, https://nanjiang.cs.illinoi
 ---
 class: dense
 ---
-
 # Example: when position is not a sufficient state
 
 The state must retain information that affects the next reward or transition.
@@ -311,7 +301,6 @@ Source: Nan Jiang, CS443 MDPs, printed slides 21–22, https://nanjiang.cs.illin
 ---
 class: dense
 ---
-
 # Why discounting makes the return well-defined
 
 An infinite sum of rewards need not converge. For bounded rewards and $0\leq\gamma<1$:
@@ -342,7 +331,6 @@ Source: Nan Jiang, CS443 MDPs, printed slides 6–8, https://nanjiang.cs.illinoi
 ---
 class: dense
 ---
-
 # Example: apply the discount weights
 
 <ReturnExplorer />
@@ -355,10 +343,9 @@ Source: Nan Jiang, CS443 MDPs, printed slides 6–8, https://nanjiang.cs.illinoi
 ---
 class: dense
 ---
-
 # Episodic tasks: stop at a terminal state
 
-CS443 also considers **episodic MDPs**. A trajectory ends on reaching a terminal state after $T$ actions.
+In an **episodic MDP**, a trajectory ends on reaching a terminal state after $T$ actions.
 
 $$G_0=\sum_{t=0}^{T-1}\gamma^tR_{t+1}.$$
 
@@ -384,7 +371,6 @@ Source: Nan Jiang, CS443 MDPs, printed slides 23–25, https://nanjiang.cs.illin
 ---
 class: dense
 ---
-
 # Example: choose a reward that matches the task
 
 The reward and horizon define which behaviors the objective prefers.
@@ -408,7 +394,6 @@ Source: Nan Jiang, CS443 MDPs, printed slides 6, 23, https://nanjiang.cs.illinoi
 ---
 class: dense
 ---
-
 # From an MDP to a reinforcement-learning problem
 
 The MDP specifies the task. It need not be known to the learner.
@@ -434,52 +419,37 @@ Source: Nan Jiang, CS443 MDPs, printed slides 2, 5, https://nanjiang.cs.illinois
 ---
 class: structure dense
 ---
-# We have a task. What can the optimizer change?
+# How can we represent a policy?
 
 <CourseMap compact focus="policy" />
 
-<div class="bridge-pair"><div><h3>Defined so far</h3><p>An MDP and its return objective.<br>A policy chooses the actions.</p></div><div><h3>Next question</h3><p>How can a table or a shared model represent a policy?</p></div></div>
+A **policy** specifies the action choice at each state. For a stochastic policy:
 
-For the learning examples, use complete finite episodes and $\gamma=1$:
+$$\pi(a\mid s)=\Pr(\text{choose action }a\mid\text{current state }s).$$
 
-$$
-G_t=\sum_{k=t}^{T-1}R_{k+1},
-\qquad \max_\pi J(\pi)=\max_\pi\mathbb E_\pi[G_0].
-$$
+<div class="bridge-pair"><div><h3>The task is defined</h3><p>Choose a policy to maximize expected return.<br><MathInline tex="J(\pi)=\mathbb E_\pi[G_0]" /></p></div><div><h3>Next: store or compute the policy</h3><p>A table stores probabilities for each state.<br>A shared model computes them from features.</p></div></div>
 
-We will replace “choose a policy” with **“learn its parameters θ.”**
+The next slides show what numbers a learning algorithm can change.
 
 <!--
-Represent the policy. Slide 18.
-This closes the modeling section by returning to the original optimization target. The demonstration episodes are finite by construction. Do not claim all gamma=1 navigation policies terminate. This is a recap and section transition, not a new objective.
+Recall the policy definition from the MDP section before introducing parameters. The learning examples continue to use complete episodes and gamma=1. The objective is unchanged.
 -->
 
 ---
 class: dense
 ---
-# Start with a table: one policy row per state
+# A tabular policy stores one distribution per state
 
-A policy gives action probabilities: $\pi_\theta(a\mid s)$. **θ contains the learnable numbers.**
+The parameters $\theta$ are the stored probabilities:
 
-For a **tabular policy**, store one probability for each state–action pair:
+$$\pi_\theta(a\mid s)=\theta_{s,a},\qquad\theta_{s,a}\geq0,\quad\sum_a\theta_{s,a}=1.$$
 
-$$
-\pi_\theta(a\mid s)=\theta_{s,a},
-\qquad \theta_{s,a}\geq0,\quad \sum_a\theta_{s,a}=1.
-$$
+<TabularPolicy />
 
-| State in our grid | North | South | West | East |
-|---|---:|---:|---:|---:|
-| $(1,2)$ | $0.10$ | $0.20$ | $0.10$ | $0.60$ |
-| $(2,2)$ | $0.25$ | $0.25$ | $0.25$ | $0.25$ |
-
-Changing the first row leaves the second row unchanged.
-
-<div class="takeaway">Our grid: 24 decision states × 4 actions = 96 stored probabilities.</div>
+<p class="small muted">Manual table editing. The 24 nonterminal grid states store 24 × 4 = 96 probabilities.</p>
 
 <!--
-Represent the policy. Slide 19.
-Source: Nan Jiang, CS 443, function approximation motivation: https://nanjiang.cs.illinois.edu/files/cs443s23/7_td_fa.pdf . The source illustrates value approximation; this lecture applies the same scale and generalization motivation to a policy. The goal is terminal, so it needs no action row. Probabilities have row-sum constraints: 96 stored values are not 96 independent degrees of freedom. Tabular policies can instead use unconstrained logits and row-wise softmax; that is still tabular. Do not suggest all parameterized policies use function approximation with sharing. This simple direct-probability table explains the representation, not a proposed unconstrained gradient update.
+Click (1,2) and read the four arrow probabilities .10,.20,.10,.60. Click (2,2) to see its uniform row. Favor East changes only that selected row. Return to (1,2): its row was unaffected. Darker fill means greater action probability; numeric labels show the exact displayed values. The table is hand-set, not learned. There are row-sum constraints, so 96 stored probabilities are not 96 independent degrees of freedom. The terminal goal needs no action row. The policy selects actions; even a boundary-pointing arrow is a valid action whose transition remains in place. Source: CS443 function approximation lecture, https://nanjiang.cs.illinois.edu/files/cs443s23/7_td_fa.pdf .
 -->
 
 ---
@@ -589,7 +559,7 @@ Evidence: constructed example or displayed algebra, recomputed by scripts/verify
 ---
 class: dense
 ---
-# Watch the same model compute its probabilities
+# One shared model produces the action probabilities
 
 <PolicyPlayground />
 
@@ -662,7 +632,7 @@ Each update combines:
 
 It is a **Monte Carlo** method: use sampled episodes to estimate an expectation.
 
-<div class="takeaway">Differentiate the policy only. The environment supplies samples.</div>
+
 
 <!--
 Learn from samples. Slide 26.
@@ -671,41 +641,24 @@ Source: Williams (1992), Simple statistical gradient-following algorithms for co
 -->
 
 ---
+class: dense
 ---
-# A one-decision MDP makes the update easier to see
+# One decision, two actions, then a reward
 
-MDPs can also have **random rewards**. Specify their distribution for each state–action pair.
+For **random rewards**, specify a reward distribution for each state–action pair.
 
-**Constructed example:** one decision state, actions A and B, then termination.
+This constructed **two-armed bandit** has one decision state:
 
-<div class="cols decision-options">
-<div>
+<BanditDiagram />
 
-### Action A
+The learner observes the selected action and its reward $R_1$.
 
-Reward **+3** with probability 0.75.<br>
-Reward **−1** with probability 0.25.
+$$G_0=R_1,\qquad J(\theta)=\mathbb E_{\pi_\theta}[G_0].$$
 
-</div>
-<div>
-
-### Action B
-
-Reward **+1** every time.
-
-</div>
-</div>
-
-The learner observes only the action it sampled and that action's reward. Here $G_0=R_1$.
-
-This is a **two-armed bandit** with objective $\max_\theta\mathbb E_{\pi_\theta}[R_1]$.
-
-<p class="small">For random rewards, <MathInline tex="R(s,a)" /> denotes their conditional mean. We compute it below.</p>
+<p class="small">Here <MathInline tex="R_1" /> is the reward after the only action. For random rewards, <MathInline tex="R(s,a)" /> denotes their conditional mean.</p>
 
 <!--
-Learn from samples. Slide 27.
-Navigation explained sequential decision-making. We now temporarily remove the sequence to isolate how a reward changes a probability. The class can see the payout rules to check the derivation; the learning update receives only samples. These are constructed teaching values, not empirical results.
-Evidence: constructed example or displayed algebra, recomputed by scripts/verify-lecture.mjs. No benchmark or general improvement claim follows.
+The diagram separates the policy action choice from the environment reward draw. A gives +3 with probability .75 and -1 with probability .25. B gives +1 with probability one. Every outcome terminates. These are specified teaching rules, not empirical outcomes. No claim of training improvement follows. The learner receives sampled feedback; the class sees the model so it can verify calculations.
 -->
 
 ---
@@ -742,15 +695,15 @@ $$
 \qquad \bar r(\mathrm B)=1
 $$
 
-So the expected reward of the policy is:
+Here $G_0=R_1$, so the **expected return** is:
 
 $$
-J(\theta)=p\cdot2+(1-p)\cdot1=1+p
+J(\theta)=\mathbb E_{\pi_\theta}[G_0]=p\cdot2+(1-p)\cdot1=1+p
 $$
 
 Here $\bar r(a)=R(s,a)$. The learner receives sampled rewards.
 
-For finite θ, $J(\theta)<2$. It approaches 2 as $\theta\to\infty$; no finite θ attains it.
+The expected return approaches 2 as $\theta\to\infty$.
 
 <!--
 Learn from samples. Slide 29.
@@ -823,7 +776,7 @@ Supply the derivative results so the class can concentrate on applying the updat
 
 <!--
 Learn from samples. Slide 32.
-Choose A/+3, then A/-1, then B/+1. Each button resets the comparison to theta=0, rather than applying sequential updates. The direction is tied to the action that was actually sampled. Even B/+1 increases B probability under plain REINFORCE, while A is better on average. The later baseline example explains how centering changes individual contributions.
+Choose A/+3, then A/-1, then B/+1. Each button resets the comparison to theta=0, rather than applying sequential updates. The direction is tied to the action that was actually sampled. Even B/+1 increases B probability under plain REINFORCE, while A is better on average. The later baseline definition explains how centering changes individual contributions.
 Evidence: constructed example or displayed algebra, recomputed by scripts/verify-lecture.mjs. No benchmark or general improvement claim follows.
 -->
 
@@ -871,25 +824,22 @@ class: dense
 ---
 # Why basic REINFORCE collects a new batch
 
-Recall the one-action gradient. Its expectation uses the **current policy**:
+Let $\tau$ be a complete episode and $\hat g(\tau;\theta)$ its REINFORCE gradient estimate.
 
-$$
-\nabla_\theta J(\theta)
-=\mathbb E_{\color{#d94d00}{A_0\sim\pi_\theta},\,R_1}
-\!\left[R_1\nabla_\theta\log\pi_\theta(A_0)\right].
-$$
+The estimator targets the current gradient when the **current policy generates the episodes**:
 
-1. Collect a batch with $\pi_{\mathrm{old}}$.
-2. Take a gradient step. The action probabilities change.
-3. The old batch still reflects $\pi_{\mathrm{old}}$, not the updated sampling probabilities.
+$$\mathbb E_{\tau\sim\pi_\theta}\!\left[\hat g(\tau;\theta)\right]=\nabla_\theta J(\theta).$$
 
-Recomputing log-probability gradients on that batch does **not** change how its actions were sampled.
+1. Collect episodes with $\pi_{\mathrm{old}}$.
+2. Update θ. This changes the distribution of future episodes.
+3. The stored episodes still come from $\pi_{\mathrm{old}}$.
 
-<div class="takeaway">Basic REINFORCE collects fresh trajectories to match the new policy. Reusing old data requires a correction or a different update objective.</div>
+Recomputing gradients on stored episodes does not change their sampling distribution.
+
+<div class="takeaway">Basic REINFORCE collects a fresh batch after its update. Reusing old data needs a correction or a different objective.</div>
 
 <!--
-Learn from samples. Slide 35.
-Source: Nan Jiang, CS 443 Policy Gradient, https://nanjiang.cs.illinois.edu/files/cs443s24/10_pg.pdf . This is about the uncorrected on-policy estimator used in the lecture. It is not a claim that every policy-gradient algorithm must discard data after one optimizer step. Old fixed gradients become stale; recomputing gradients on old samples changes the integrand but not their distribution. For trajectories, both action frequencies and visited states / continuations change. The next slide gives a one-state counterexample without those additional complications.
+The same statement applies to the bandit and to multi-action episodes, without introducing a special reward index. The identity assumes the REINFORCE estimator and regularity/integrability conditions established in the appendix. Fresh samples match the current policy distribution. This is a statement about the uncorrected estimator, not a prohibition on all data reuse. Sources: Williams (1992); CS443 policy gradient lecture, https://nanjiang.cs.illinois.edu/files/cs443s24/10_pg.pdf ; Spinning Up, https://spinningup.openai.com/en/latest/spinningup/rl_intro3.html .
 -->
 
 ---
@@ -1012,87 +962,33 @@ Sources: Sutton and Barto, Reinforcement Learning: An Introduction, Chapter 13; 
 -->
 
 ---
+class: dense
 ---
-# The two-action episode gives a numerical update
+# Weight each action by the rewards that follow it
 
-Recall the recorded actions **A, A**, with rewards **0, 4**, so $G_0=4$.
-
-Suppose both visited states use $\pi_\theta(\mathrm A\mid s)=\sigma(\theta)$ and $\theta=0$.
-
-Each sampled A has derivative $1-p=0.5$. Therefore:
+An action at time $t$ cannot change rewards already received. For $\gamma=1$:
 
 $$
-\hat g=4(0.5+0.5)=4
+G_0=\underbrace{\sum_{k=0}^{t-1}R_{k+1}}_{\text{before action }t}
++\underbrace{\sum_{k=t}^{T-1}R_{k+1}}_{G_t:\ \text{return-to-go}}.
 $$
 
-With learning rate $\alpha=0.1$:
+The earlier-reward terms contribute zero **in expectation** to that action's score gradient.
 
-$$
-\theta_{\mathrm{new}}=0+0.1(4)=0.4,
-\qquad p_{\mathrm{new}}=\sigma(0.4)\approx0.599
-$$
+$$\boxed{\hat g=\sum_{t=0}^{T-1}G_t\nabla_\theta\log\pi_\theta(a_t\mid s_t)}.$$
+
+This is **REINFORCE with return-to-go**: weight each sampled action by its subsequent return.
+
+<p class="small">The expected gradient stays the same. This does not identify which action caused an outcome. Appendix C proves the cancellation.</p>
 
 <!--
-Extend to trajectories. Slide 40.
-The policy deliberately shares the same scalar parameter across the two visited states, so the two score derivatives add into one scalar gradient. We need only this sampled trace to compute its contribution; it is not proof that the whole policy improved. Alpha .1 is chosen here for a modest visible step.
-Evidence: constructed example or displayed algebra, recomputed by scripts/verify-lecture.mjs. No benchmark or general improvement claim follows.
+The decomposition connects the complete-episode estimator to return-to-go. Conditional on history before action t, the earlier rewards are fixed and the expected policy score is zero. This yields the same expected gradient when they are omitted. It is not a per-sample equality and does not guarantee a lower variance for every possible reward distribution. The lecture uses gamma=1; the discounted start-state version needs the outer gamma^t shown in Appendix D. Sources: Sutton and Barto, Chapter 13; Spinning Up, https://spinningup.openai.com/en/latest/spinningup/rl_intro3.html .
 -->
 
 ---
 class: dense
 ---
-# REINFORCE with return-to-go
-
-Recall the three-move navigation route with rewards $-1,-1,-1$ and $\gamma=1$:
-
-| Action | Already received | Rewards still to follow | Return-to-go |
-|---|---|---|---:|
-| North at $t=0$ | None | $-1,-1,-1$ | $G_0=-3$ |
-| East at $t=1$ | $-1$ | $-1,-1$ | $G_1=-2$ |
-| South at $t=2$ | $-1,-1$ | $-1$ | $G_2=-1$ |
-
-A later action cannot affect rewards already received. Remove those terms without changing the expected gradient:
-
-$$
-\boxed{\hat g=\sum_{t=0}^{T-1}G_t\nabla_\theta\log\pi_\theta(a_t\mid s_t)}.
-$$
-
-This is REINFORCE with **return-to-go**. An episode still gives noisy credit: a good return can follow an unhelpful action.
-
-<!--
-Extend to trajectories. Slide 41.
-Use the familiar navigation trace only to identify which rewards remain at each time, not to claim these three samples train a complete navigation policy. Negative returns give negative sample weights; the expected update is still the gradient of the negative-step objective. Rewards from the past have zero expected score contribution conditional on pre-action history.
-Sources: Sutton and Barto, Reinforcement Learning: An Introduction, Chapter 13; Nan Jiang, CS 443 Policy Gradient, https://nanjiang.cs.illinois.edu/files/cs443s24/10_pg.pdf This prevents an overly literal interpretation of reinforcing every successful-episode action. The next change is justified by causality, not by assuming we can infer the unique cause of success.
--->
-
----
----
-# The return weights are computed after the episode
-
-For $\gamma=1$, compute backward from the terminal state:
-
-$$
-G_T=0,\qquad G_t=R_{t+1}+G_{t+1}.
-$$
-
-| Calculation order for the three-move route | Return |
-|---|---:|
-| Terminal state | $G_3=0$ |
-| Last action | $G_2=-1+0=-1$ |
-| Second action | $G_1=-1+(-1)=-2$ |
-| First action | $G_0=-1+(-2)=-3$ |
-
-Store each return beside the log-probability of the action taken at that time.
-
-<!--
-Extend to trajectories. Slide 42.
-This is why REINFORCE waits for complete episodes. The weighted log-probability needs the return from that action onward. A scalar return is a fixed weight in the policy derivative, not a differentiable simulation output.
--->
-
----
-class: dense
----
-# A negative weighted log loss implements gradient ascent
+# Implement REINFORCE with a loss function
 
 Collect $N$ complete episodes at fixed θ. Let $i$ index episodes and $t$ index their actions. Optimizers minimize a loss:
 
@@ -1112,7 +1008,7 @@ A **plain SGD** step gives $\theta\leftarrow\theta+\alpha\hat g_{\mathrm{batch}}
 <p class="small">Evaluate this gradient at the collection parameters. The loss value does not estimate expected return.</p>
 
 <!--
-Extend to trajectories. Slide 43.
+Extend to trajectories. Slide 41.
 The loss is a device for constructing the desired gradient. Its numerical value is not an estimate of J. The action log-probabilities carry gradients; sampled actions, rewards, and return weights are treated as data.
 -->
 
@@ -1139,249 +1035,56 @@ optimizer.step()
 Then collect new episodes with the updated policy.
 
 <!--
-Extend to trajectories. Slide 44.
+Extend to trajectories. Slide 42.
 The stored log probabilities must remain differentiable evaluations under the collection policy. Parameters stay fixed throughout collection. A real rollout samples actions and rewards, and stores the corresponding log probability. The sketch omits that plumbing so students can map every line to the estimator. Trace rewards [-1,-1,-1] through the inner loop. Returns should be [-3,-2,-1].
 -->
 
 ---
-class: structure dense
+class: dense
 ---
-# Unbiased gradients and noisy updates
+# A baseline centers the return weight
 
-<CourseMap compact focus="baselines" />
+REINFORCE uses a sampled return $G_t$. Subtract a **baseline** $b(s_t)$:
 
-<div class="bridge-pair"><div>
+$$\hat g_b=\sum_{t=0}^{T-1}\bigl(G_t-b(s_t)\bigr)\nabla_\theta\log\pi_\theta(a_t\mid s_t).$$
 
-### What we can now implement
+- For the same state, use the same baseline for every action.
+- Keep it fixed for the batch and in the policy derivative.
+- The expected gradient is unchanged. A suitable baseline can reduce **gradient-estimate variance**.
 
-Collect episodes → compute returns → update θ.
+A common choice is a prediction of the policy's expected return from that state.
 
-Evaluate with **fresh episode returns**, not the training loss.
+<div class="takeaway">Compare the observed return with what the policy usually achieves from that state.</div>
 
-</div><div>
-
-### What still varies
-
-The sampled actions and their rewards change from run to run.
-
-A single update can point in the wrong direction.
-
-</div></div>
-
-**Next:** recall the bandit, subtract a baseline, and measure the change in gradient variance.
+<p class="small">A baseline need not reduce variance. The cancellation proof and variance details are in Appendix C.</p>
 
 <!--
-Reduce gradient noise. Slide 45.
-The bandit demo shows p(A) and an analytical expected reward because its model is known to the instructor. A general unknown environment instead needs sampled evaluation episodes. Do not interpret monotonic optimizer loss as monotonic task improvement. This transition distinguishes noisy gradient estimates from the scalar performance metric. Frozen-policy evaluation measures return on fresh episodes; do not use the weighted log loss as a return estimate.
+This is the first of exactly two baseline slides. State only verified results: an action-independent fixed baseline has zero expected score contribution, so the mean gradient is preserved; variance depends on the baseline. No promise of faster training, monotonic return, or universally lower variance. Fixing the baseline before collecting the batch is a sufficient condition for the stated finite-sample unbiasedness; it is not a requirement for every practical actor-critic implementation. Hold its output fixed in the actor derivative. Source: Sutton and Barto, Reinforcement Learning, Chapter 13; CS443 policy gradient slides; Spinning Up, https://spinningup.openai.com/en/latest/spinningup/rl_intro3.html .
 -->
 
 ---
 class: dense
 ---
-# Recall the bandit and its gradient estimator
+# Value and advantage: compare an action with its policy
 
-Return to the **one-decision bandit**. Reset the policy to $\theta=0$:
+The **state value** is expected return from state $s$, following policy $\pi$:
 
-$$
-\pi_\theta(\mathrm A)=p=\sigma(\theta)=\frac{1}{1+e^{-\theta}},\qquad
-\pi_\theta(\mathrm B)=1-p,\qquad p=0.5.
-$$
+$$v_\pi(s)=\mathbb E_\pi[G_t\mid S_t=s].$$
 
-| Sampled action | Reward rule | Mean reward | Log-probability derivative at $\theta=0$ |
-|---|---|---:|---:|
-| A | $+3$ with probability $.75$; otherwise $-1$ | $2$ | $1-p=+0.5$ |
-| B | Always $+1$ | $1$ | $-p=-0.5$ |
+The **action value** first takes action $a$, then follows $\pi$:
 
-One episode has one reward, so $G_0=R_1$. The update is
+$$Q^\pi(s,a)=\mathbb E_\pi[G_t\mid S_t=s,A_t=a].$$
 
-$$
-\hat g=G_0\,\frac{d}{d\theta}\log\pi_\theta(a),
-\qquad \theta_{\mathrm{new}}=\theta+\alpha\hat g.
-$$
+Their difference is the **advantage**:
 
-Example: A gives $+3$. Then $\hat g=3(0.5)=1.5$.
+$$\boxed{A^\pi(s,a)=Q^\pi(s,a)-v_\pi(s).}$$
 
-With $\alpha=0.4$, $\theta_{\mathrm{new}}=0.6$. Next we change the **return weight** in this update.
+Positive advantage means higher expected return than the policy's average at that state.
+
+<p class="small">The actor <MathInline tex="\pi_\theta" /> chooses actions. A critic <MathInline tex="V_\phi(s)" /> predicts <MathInline tex="v_\pi(s)" /> and can supply the baseline.</p>
 
 <!--
-Reduce gradient noise. Slide 46.
-Explicitly return to the bandit, rather than the earlier four-action grid model. The bandit uses one sigmoid probability; the grid used a four-action softmax. Recall that +3 is one possible reward, not the expected reward of A. The reset matters because the live training demonstration may have ended with a different theta. The alpha=.4 example matches the one-sample bandit demonstration.
-Evidence: constructed example or displayed algebra, recomputed by scripts/verify-lecture.mjs. No benchmark or general improvement claim follows.
--->
-
----
-class: dense
----
-# Using expected return as the baseline
-
-At $p=0.5$, the current policy's expected return is
-
-$$
-b=\mathbb E[G_0]=0.5(2)+0.5(1)=1.5.
-$$
-
-Replace the return weight in the same bandit update:
-
-$$
-\hat g_b=(G_0-b)\,\frac{d}{d\theta}\log\pi_\theta(a).
-$$
-
-| Observed outcome | $G_0$ | $G_0-b$ | Resulting gradient $\hat g_b$ |
-|---|---:|---:|---:|
-| A gives $+3$ | $3$ | $+1.5$ | $(1.5)(0.5)=+0.75$ |
-| B gives $+1$ | $1$ | $-0.5$ | $(-0.5)(-0.5)=+0.25$ |
-| A gives $-1$ | $-1$ | $-2.5$ | $(-2.5)(0.5)=-1.25$ |
-
-B gives a positive reward, but falls below the policy's average. Its centered update now decreases B's probability.
-
-<!--
-Reduce gradient noise. Slide 47.
-This returns to the same bandit, rather than introducing a new task. The earlier positive B reward increased B's probability in plain REINFORCE. Subtracting a baseline gives a more direct better/worse-than-expected interpretation. Tie each centered return to the score derivative from the preceding recap. Increasing theta raises A and lowers B. This motivates relative feedback; the following slides separate unbiasedness from variance reduction.
-Evidence: constructed example or displayed algebra, recomputed by scripts/verify-lecture.mjs. No benchmark or general improvement claim follows.
--->
-
----
-class: dense variance-definition
----
-# Variance: how far do estimates spread around their mean?
-
-For a scalar random quantity $X$ with mean $m=\mathbb E[X]$:
-
-$$
-\boxed{\operatorname{Var}(X)=\mathbb E[(X-m)^2]
-=\sum_i p_i(x_i-m)^2.}
-$$
-
-Here $x_i$ is a possible value; $p_i$ is its probability.
-
-For our bandit at $\theta=0$, the **uncentered gradient** has this distribution:
-
-| Outcome | Probability $p_i$ | Gradient $x_i=\hat g_0$ |
-|---|---:|---:|
-| Choose A, receive +3 | $0.5\times0.75=0.375$ | $3(0.5)=1.5$ |
-| Choose A, receive −1 | $0.5\times0.25=0.125$ | $(-1)(0.5)=-0.5$ |
-| Choose B, receive +1 | $0.5\times1=0.5$ | $1(-0.5)=-0.5$ |
-
-$$m=0.375(1.5)+0.125(-0.5)+0.5(-0.5)=0.25.$$
-
-<!--
-Reduce gradient noise. Slide 48.
-This is variance of the gradient estimator, not variance of the reward. The scalar model avoids introducing covariance matrices. The outcome probabilities include both the policy probability and the reward probability. Two outcomes happen to give the same gradient; keeping them separate connects to the known bandit. Variance measures squared spread, in squared gradient units. It is not a guarantee on any one estimate.
-Evidence: constructed example or displayed algebra, recomputed by scripts/verify-lecture.mjs. No benchmark or general improvement claim follows.
--->
-
----
-class: dense
----
-# Calculate the variance as we change the baseline
-
-<BaselineVariance />
-
-<!--
-Reduce gradient noise. Slide 49.
-Start with b=0. The raw gradient values are 1.5, -.5, -.5 with probabilities .375, .125, .5. Their mean is .25 and variance .9375. Set b=1.5. The values become .75, -1.25, .25. The rare unlucky A outcome moves farther from the mean, but the more likely outcomes move closer. The probability-weighted squared deviations fall to .375, a 60% reduction. The mean remains .25. Set b=4 to show variance 1.9375: any baseline is not necessarily helpful. Subtracting a constant does not change reward variance; multiplying by the action-dependent score changes the gradient variance. Lower gradient variance makes a batch estimate more precise for the same number of episodes. The appendix gives the algebra and the independent-batch variance formula. Start at b=0. Sum the last column: .5859375+.0703125+.28125=.9375. Set b=1.5: .09375+.28125+0=.375. The exact mean remains .25. b=4 is a counterexample to the claim that every baseline helps. Quarter-step baselines produce variance terms with denominator at most 512, requiring up to nine decimal places. The variance itself needs up to six decimal places.
-Evidence: constructed example or displayed algebra, recomputed by scripts/verify-lecture.mjs. No benchmark or general improvement claim follows.
--->
-
----
-class: dense
----
-# Independent batches: variance and estimation error
-
-Recall the batch update at fixed θ:
-
-$$
-\bar g_N=\frac1N\sum_{i=1}^N\hat g_b^{(i)},
-\qquad \theta_{\mathrm{new}}=\theta+\alpha\bar g_N.
-$$
-
-For this bandit at θ = 0, use **independent episodes** and a fixed baseline:
-
-$$
-\mathbb E[\bar g_N]=0.25,
-\qquad
-\boxed{\mathbb E[(\bar g_N-0.25)^2]=\operatorname{Var}(\bar g_N)=\frac{\operatorname{Var}(\hat g_b)}{N}.}
-$$
-
-<div class="variance-budget"><div><h3>Without a baseline</h3><p>Single episode: <b>0.9375</b></p><div class="budget-track"><i style="width:100%"></i></div></div><div><h3>With b = 1.5</h3><p>Single episode: <b>0.3750</b></p><div class="budget-track"><i style="width:40%"></i></div></div></div>
-
-For the same N, b = 1.5 gives **60% lower mean squared gradient error** at θ = 0.
-
-<!--
-Reduce gradient noise. Slide 50.
-At N=10 the batch variances are .09375 and .0375. Var(theta_new | theta)=alpha^2 Var(batch gradient), with fixed alpha. The expected gradient is still .25. This compares gradient precision at a fixed policy; it is not a 60% guarantee about training speed or final reward. A baseline does not reduce Var(G) merely by subtracting a constant. It reduces Var((G-b)z), because z depends on the sampled action.
-Evidence: constructed example or displayed algebra, recomputed by scripts/verify-lecture.mjs. No benchmark or general improvement claim follows.
--->
-
----
-class: dense
----
-# Subtract a baseline without changing the mean gradient
-
-For one complete episode, replace $G_t$ with $G_t-b(s_t)$:
-
-$$
-\hat g_b=\sum_{t=0}^{T-1}\bigl(G_t-b(s_t)\bigr)
-\nabla_\theta\log\pi_\theta(a_t\mid s_t).
-$$
-
-<div class="cols">
-<div>
-
-**Which baseline is allowed?**
-
-- It may vary with the state.
-- Use the same $b(s)$ for all actions at that state.
-- Fix it before collecting the batch.
-- Hold it fixed in the actor derivative.
-
-</div>
-<div>
-
-**What changes?**
-
-- Individual sample updates change.
-- The expected gradient stays the same.
-- A suitable baseline can reduce variance.
-
-</div>
-</div>
-
-<p class="small muted">The same conditions apply at every state. Appendix C proves that the expected gradient is unchanged.</p>
-
-<!--
-Reduce gradient noise. Slide 51.
-Keep baseline values fixed during the policy gradient computation. The theorem concerns action-independent baseline functions; a fitted baseline correlated with the same sample can require extra care for strict finite-sample unbiasedness. We use a fixed exact baseline for the numerical example.
-Sources: Sutton and Barto, Reinforcement Learning: An Introduction, Chapter 13; Nan Jiang, CS 443 Policy Gradient, https://nanjiang.cs.illinois.edu/files/cs443s24/10_pg.pdf Appendix C proves the result line by line. This slide states the condition and the estimator; no proof is required for the main lecture. Interpret the condition as a fixed state-only function during the gradient estimate. For strict unbiasedness, do not construct b from the very sampled action/reward it centers without accounting for that dependence.
--->
-
----
-class: dense
----
-# A learned value function provides a baseline
-
-Recall the **state value** under the current policy:
-
-$$
-v_\pi(s)=\mathbb E_\pi[G_t\mid S_t=s].
-$$
-
-Fit $V_\phi(s)$ to observed returns. It estimates $v_\pi(s)$ and can have prediction error.
-
-<div class="actor-critic"><div><h3>Actor: <MathInline tex="\pi_\theta(a\mid s)" /></h3><p>Chooses actions.<br>θ controls the policy.</p></div><div><h3>Value predictor: <MathInline tex="V_\phi(s)" /></h3><p>Predicts expected return.<br>φ controls the value prediction.</p></div></div>
-
-Use the prediction as a baseline:
-
-$$
-G_t-V_\phi(s_t)
-=\text{observed return}-\text{predicted return}.
-$$
-
-PPO uses a value predictor as its **critic**, typically with bootstrapping (Appendix F).
-
-<!--
-Reduce gradient noise. Slide 52.
-A learned Monte Carlo baseline by itself does not require bootstrapping. Standard PPO is an actor-critic method and typically uses bootstrapped advantage estimates. Architectures may share feature layers; separate theta and phi here distinguish the optimization roles. Hold the baseline fixed when forming the actor gradient.
+The second baseline slide defines value and advantage, without another example. G_t is the return under the current horizon and discount convention. Our main examples are episodic with gamma=1; time must be represented if it changes the remaining task. Q means take the stated first action then follow pi. v averages over the policy action choice at the state, and A=Q-v. A learned V_phi can have prediction error; it is not an exact value function merely because it is called a critic. Actor and critic may share representation layers. Source: Sutton and Barto, Chapters 3 and 13; Spinning Up, https://spinningup.openai.com/en/latest/spinningup/rl_intro3.html .
 -->
 
 ---
@@ -1400,8 +1103,8 @@ The old-data example showed a **sampling mismatch** after the policy changes.
 <div class="takeaway">Reuse recent experience locally. Then collect fresh experience.</div>
 
 <!--
-Reuse recent experience. Slide 53.
-Source: Schulman et al., Proximal Policy Optimization Algorithms (2017), sections 2–5, https://arxiv.org/abs/1707.06347 . Keep this at the high level. PPO uses an action likelihood ratio in a surrogate objective; it does not use an exact full-trajectory importance-sampled return gradient. PPO still needs fresh interaction after several passes through a recent batch. Critic details and exact objectives remain optional appendix material.
+Reuse recent experience. Slide 45.
+Source: Schulman et al., Proximal Policy Optimization Algorithms (2017), sections 2–5, https://arxiv.org/abs/1707.06347 . Keep this at the high level. PPO uses an action likelihood ratio in a surrogate objective; it does not use an exact full-trajectory importance-sampled return gradient. PPO still needs fresh interaction after several passes through a recent batch. The next slides define the ratio and the clipped objective. GAE and importance-sampling derivations remain in the appendix.
 -->
 
 ---
@@ -1425,38 +1128,8 @@ The batch estimates how actions perform when followed by the old policy. A large
 <div class="takeaway">The surrogate uses old-policy data. Clipping does not guarantee a trust region or a return increase.</div>
 
 <!--
-Reuse recent experience. Slide 54.
+Reuse recent experience. Slide 46.
 Source: Schulman et al., Proximal Policy Optimization Algorithms (2017), sections 2–5, https://arxiv.org/abs/1707.06347 . Source: Schulman et al., Trust Region Policy Optimization (2015), sections 2–4, https://arxiv.org/abs/1502.05477 . The probability bars illustrate change at one state, not measured performance or guaranteed safe thresholds. In the bandit, there are no changed future states, but finite-data noise and unstable weights still matter. In a multi-step MDP, the surrogate uses the collecting policy state distribution. Its local gradient matches the policy gradient with exact advantages and the proper time weighting, but its value is not the actual new-policy return. Close policy distributions can limit this mismatch under the theoretical assumptions; PPO clipping itself is not a hard trust-region guarantee.
--->
-
----
-class: dense
----
-# PPO weights actions by estimated advantage
-
-An **advantage** asks: how much better is this action than the state's usual outcome?
-
-$$
-A^\pi(s,a)=Q^\pi(s,a)-v_\pi(s).
-$$
-
-Here $Q^\pi(s,a)$ is expected return after taking $a$ in $s$, then following $\pi$.
-
-In the bandit at $p(\mathrm A)=0.5$, the state value is 1.5:
-
-| Action | Expected reward | Advantage |
-|---|---:|---:|
-| A | $2$ | $2-1.5=+0.5$ |
-| B | $1$ | $1-1.5=-0.5$ |
-
-PPO uses an estimate $\hat A_t$:
-
-- Positive: favor increasing the sampled action's probability.
-- Negative: favor decreasing it.
-
-<!--
-Reuse recent experience. Slide 55.
-True advantage is a conditional expectation. A realized return minus a baseline is a noisy estimate, not the true advantage itself. PPO commonly constructs estimates from critic predictions and generalized advantage estimation (GAE). The main lecture does not derive GAE. These conditional means come from the same bandit.
 -->
 
 ---
@@ -1483,8 +1156,41 @@ The unclipped score is $\rho_t(\theta)\hat A_t$. The batch and advantage estimat
 <p class="small">This ratio corrects action frequencies at recorded states. It does not fully correct the distribution of entire trajectories. The appendix derives the distinction.</p>
 
 <!--
-Reuse recent experience. Slide 56.
+Reuse recent experience. Slide 47.
 Source: Schulman et al., Trust Region Policy Optimization (2015), sections 2–4, https://arxiv.org/abs/1502.05477 . Source: Schulman et al., Proximal Policy Optimization Algorithms (2017), sections 2–5, https://arxiv.org/abs/1707.06347 . At a fixed state the ordinary importance identity is exact for a suitable integrand and sufficient support. PPO then clips a surrogate based on fixed old-policy state samples and advantage estimates. Clipping modifies the objective and is not an unbiased IS estimate of the new policy return. Preserve the old log-probability denominator throughout a PPO batch; replacing it with the newest policy would destroy this comparison.
+-->
+
+---
+class: dense
+---
+# PPO-Clip: the objective and its advantage estimate
+
+For each recorded action, $\hat A_t$ estimates $A^{\pi_{\mathrm{old}}}(s_t,a_t)$.
+**The hat means an estimate.** Keep it fixed during policy updates.
+
+$$
+L_t^{\mathrm{clip}}(\theta)=\min\!\left(
+\rho_t(\theta)\hat A_t,\;
+\operatorname{clip}(\rho_t(\theta),1-\epsilon,1+\epsilon)\hat A_t
+\right).
+$$
+
+Maximize the average over the $M$ recorded steps:
+$L^{\mathrm{clip}}(\theta)=\frac1M\sum_t L_t^{\mathrm{clip}}(\theta)$.
+
+| Quantity | Meaning |
+|---|---|
+| $\rho_t=\pi_\theta(a_t\mid s_t)/\pi_{\mathrm{old}}(a_t\mid s_t)$ | Change in probability of this recorded action |
+| $\epsilon>0$ | Clipping width; the next plots use $0.2$ |
+| $\operatorname{clip}(x,l,u)$ | Restrict $x$ to the interval $[l,u]$ |
+
+For complete episodes, a simple estimate is $\hat A_t=G_t-V_\phi(s_t)$.
+PPO often uses **GAE**, combining rewards and critic predictions (Appendix F).
+
+<p class="small muted">Optimize this surrogate for several passes, then collect new data. It is not the expected return itself.</p>
+
+<!--
+The preceding slide defines the probability ratio. This slide gives the exact PPO-Clip actor surrogate, with a sample mean over rollout transitions as in the original paper. The clipped term and unclipped term are compared by a minimum, not by clipping every realized ratio as a constraint. Advantage estimates target the collecting policy, stay fixed during the policy optimization passes, and can be noisy or biased through critic approximation and bootstrapping. G_t-V_phi(s_t) is a Monte Carlo estimate for complete episodes, not a claim that all PPO implementations use it. The hat has nothing to do with the action set A. Critic regression and optional entropy bonuses are separate terms. Source: Schulman et al., PPO (2017), Eq. 7 and Algorithm 1, https://arxiv.org/abs/1707.06347 .
 -->
 
 ---
@@ -1504,93 +1210,9 @@ Beyond the threshold, further movement in the favored direction earns no additio
 <p class="small">Clipping removes an incentive for further change. The actual probability ratio can still move beyond the threshold.</p>
 
 <!--
-Reuse recent experience. Slide 57.
-Move the positive slider above 1.2: the clipped objective stops rising. Move the negative slider below .8: the clipped objective stops rising there. Then move each in the harmful direction to see why clipping is one-sided. The exact min/clip expression is in the appendix. The plots show a fixed sample and fixed advantage; other samples and shared parameters can still move its probability.
+Reuse recent experience. Slide 49.
+Move the positive slider above 1.2: the clipped objective stops rising. Move the negative slider below .8: the clipped objective stops rising there. Then move each in the harmful direction to see why clipping is one-sided. The preceding slide gives the min/clip expression; the appendix supplies further details. The plots show a fixed sample and fixed advantage; other samples and shared parameters can still move its probability.
 Source: Schulman et al. (2017), Proximal Policy Optimization Algorithms, https://arxiv.org/abs/1707.06347. PPO-Clip is the variant discussed here.
--->
-
----
-class: dense
----
-# KL divergence offers another way to limit policy change
-
-**KL divergence** measures how different two action distributions are at a state. It is zero when they agree.
-
-| Method | How it controls a policy update |
-|---|---|
-| TRPO (2015) | Approximately solves a problem with an average KL constraint |
-| PPO with a KL penalty (2017) | Subtracts a KL penalty from the surrogate |
-| PPO-Clip (2017) | Removes the incentive for excessive changes in selected action ratios |
-
-For a KL penalty, the idea is
-
-$$
-\text{update score}=\text{surrogate score}-\beta\,\text{KL change},
-\qquad \beta>0.
-$$
-
-Larger $\beta$ discourages more change. The penalty strength can adapt to a target KL.
-
-<p class="small">The original PPO paper includes both clipping and an adaptive KL-penalty variant. The appendix compares these with later uses of a fixed reference policy.</p>
-
-<!--
-Reuse recent experience. Slide 58.
-Source: Schulman et al., Trust Region Policy Optimization (2015), sections 2–4, https://arxiv.org/abs/1502.05477 . Source: Schulman et al., Proximal Policy Optimization Algorithms (2017), sections 2–5, https://arxiv.org/abs/1707.06347 . KL constraints predate PPO; adaptive KL penalties are in the original PPO paper rather than only later methods. The practical TRPO method approximately solves a constrained surrogate problem. A penalty is a tradeoff, not a guaranteed hard bound. PPO-Clip may also monitor KL and stop optimization early in implementations; do not present that optional safeguard as the definition of clipping. KL is asymmetric, so the appendix specifies its order.
--->
-
----
-class: dense
----
-# PPO retains the interaction-and-update loop
-
-<div class="learning-cycle"><div>Collect a rollout<br>with <MathInline tex="\pi_{\mathrm{old}}" /></div><span>→</span><div>Use the critic<br>to estimate <MathInline tex="\hat A_t" /></div><span>→</span><div>Take several<br>clipped updates</div><span>→</span><div>Collect fresh data<br>with the new policy</div></div>
-
-| Basic REINFORCE in this lecture | Typical PPO-Clip |
-|---|---|
-| Complete episodes provide returns | Critic helps estimate returns and advantages |
-| One update per newly collected batch | Several minibatch passes over a recent rollout |
-| Return-weighted log-probability gradient | Ratio-based clipped objective with advantage weights |
-
-After several passes, PPO collects a new rollout. The ratio and clipping do not make one batch valid forever.
-
-The PPO paper’s Algorithm 1 uses an **actor and a critic**.
-
-<!--
-Reuse recent experience. Slide 59.
-The critic also receives its own regression updates. Entropy bonuses and early stopping by KL divergence are common practical additions, not covered in the main loop. PPO remains an on-policy family despite limited reuse within a collection iteration. Do not promise greater stability on every problem.
-Source: Schulman et al. (2017), Proximal Policy Optimization Algorithms, https://arxiv.org/abs/1707.06347. PPO-Clip is the variant discussed here. Close the loop explicitly: reuse is limited to a recent batch, and the old policy snapshot is refreshed for the next collection phase.
--->
-
----
-class: dense
----
-# Suggested project workflow
-
-<div class="project-stages"><div><b>1 · Define</b><p>State, actions, reward.<br>Termination and evaluation.</p></div><span>→</span><div><b>2 · Verify</b><p>Run a random policy.<br>Inspect one episode.</p></div><span>→</span><div><b>3 · Learn</b><p>Implement REINFORCE.<br>Check one update by hand.</p></div></div>
-
-<div class="project-stages"><div><b>4 · Measure</b><p>Evaluate fresh episodes.<br>Repeat across random seeds.</p></div><span>→</span><div><b>5 · Compare</b><p>Compare a baseline.<br>Then try a PPO implementation.</p></div></div>
-
-**Does the reward measure the behavior your project actually needs?**
-
-<p class="small">A useful first plot compares learned-policy returns with a random-policy reference.</p>
-
-<!--
-Reuse recent experience. Slide 60.
-This is a suggested development route, not a claim that the course assignment requires implementing PPO from scratch. For this project-based course, students should understand and debug the simpler algorithm before relying on a larger implementation. Evaluate fixed policies on fresh runs. A random-policy run helps expose environment, reward, and termination mistakes before debugging learning. PPO is a suggested comparison, not a requirement to implement it from scratch.
--->
-
----
-class: dense
----
-# Check the full argument
-
-<ConceptCheck />
-
-<p class="small muted">Explain the idea first. Then reveal an answer or use the footer to revisit that section.</p>
-
-<!--
-Reuse recent experience. Slide 61.
-Answers: reward -1 and gamma1 give J=-E[T]; Markov is predictive sufficiency, not an immediate-reward objective; theta parameterizes the policy and shared weights can change predictions across states; return is scalar data, J is expected performance, g-hat estimates its parameter gradient; REINFORCE uses current-policy actions, their log-probabilities, and returns; a baseline centers, a critic predicts, clipping changes the update incentive. Invite a student to compute the A/+3 update. Ask the class before revealing. The controls reset the answer when switching questions.
 -->
 
 ---
@@ -1603,7 +1225,7 @@ The main lecture uses the update rules. Open a topic to see why they work.
 <AppendixMap />
 
 <!--
-Appendix. Slide 62.
+Appendix. Slide 50.
 Use these as optional board material or follow-up reading. Appendix C preserves the CS 443 baseline proof requested by the instructor.
 -->
 
@@ -1631,7 +1253,7 @@ Write $m(y)=\mathbb E[X\mid Y=y]$. Before $Y$ is known, $m(Y)$ is itself random.
 <div class="takeaway">The conditional mean is a group average, not a single observed reward.</div>
 
 <!--
-Appendix. Slide 63.
+Appendix. Slide 51.
 Source: ProbabilityCourse, Conditional Expectation: https://www.probabilitycourse.com/chapter5/5_1_5_conditional_expectation.php . The bandit arithmetic is constructed for this lecture. Read the vertical bar as given. In the bandit m(A0) is 2 when A is chosen and 1 when B is chosen; it is not the random reward itself. Define this before applying the tower rule to a reward times a gradient. For continuous conditioning variables, use the corresponding conditional expectation; the simple discrete example is enough for this lecture.
 -->
 
@@ -1663,7 +1285,7 @@ At $p=0.5$, the overall mean reward is **1.5**.
 <div class="takeaway">No independence assumption is needed. The group means may differ.</div>
 
 <!--
-Appendix. Slide 64.
+Appendix. Slide 52.
 Source: ProbabilityCourse, Conditional Expectation: https://www.probabilitycourse.com/chapter5/5_1_5_conditional_expectation.php . The bandit arithmetic is constructed for this lecture. Also called the tower property or iterated expectation. State integrability: E[|X|] is finite for the general signed-variable result used here. The finite reward example satisfies this. If the student treats the inner expectation as a constant, return to m(Y): its value changes with Y. Later take X=R1 z_theta(A0) and Y=A0, applying the identity to each component of the gradient.
 -->
 
@@ -1697,7 +1319,7 @@ $$
 Once we condition on $Y=y$, the factor $c(y)$ is fixed.
 
 <!--
-Appendix. Slide 65.
+Appendix. Slide 53.
 Source: ProbabilityCourse, Conditional Expectation: https://www.probabilitycourse.com/chapter5/5_1_5_conditional_expectation.php . The bandit arithmetic is constructed for this lecture. Terms for groups of probability zero can be omitted. Infinite sums require the usual integrability conditions to interchange them. The fixed-factor identity is ordinary linearity of expectation inside the conditional distribution. In the policy-gradient proof the known factor is z_theta(a), fixed once the action a is given. For a vector gradient, apply each identity component by component.
 -->
 
@@ -1731,7 +1353,7 @@ $$
 $$
 
 <!--
-Appendix. Slide 66.
+Appendix. Slide 54.
 Read top to bottom as one mathematical proof. The reward mean is fixed while differentiating. The identity is a direct scalar chain rule applied to a positive probability with vector parameters. Positivity avoids division by zero; fixed support and regularity permit extensions. No mysterious missing factor is introduced.
 Sources: Sutton and Barto, Reinforcement Learning: An Introduction, Chapter 13; Nan Jiang, CS 443 Policy Gradient, https://nanjiang.cs.illinois.edu/files/cs443s24/10_pg.pdf
 -->
@@ -1766,7 +1388,7 @@ $$
 $$
 
 <!--
-Appendix. Slide 67.
+Appendix. Slide 55.
 The first line is the law of total expectation. The second pulls out a deterministic vector after conditioning on the action. This proves the sample estimator instead of asking students to accept that an observed reward can replace a mean. Samples are from the current policy.
 Sources: Sutton and Barto, Reinforcement Learning: An Introduction, Chapter 13; Nan Jiang, CS 443 Policy Gradient, https://nanjiang.cs.illinois.edu/files/cs443s24/10_pg.pdf The new probability refresher defines the law used in line 1 and the fixed-factor property in line 2. The equality is about an average over fresh action–reward samples at fixed theta, not equality of each individual sampled estimate to the gradient. Source: ProbabilityCourse, Conditional Expectation: https://www.probabilitycourse.com/chapter5/5_1_5_conditional_expectation.php . The bandit arithmetic is constructed for this lecture.
 -->
@@ -1794,7 +1416,7 @@ In the teaching bandit, $J=1+p$, so the exact gradient is $dJ/d\theta=p(1-p)$.
 At $p=0.5$, this equals $0.25$. The next slide checks that sampled gradients have this mean.
 
 <!--
-Appendix. Slide 68.
+Appendix. Slide 56.
 This is the calculus behind the derivatives supplied in the main lecture. The same theta changes both action probabilities, and normalization forces the two derivatives to have opposite signs.
 Evidence: constructed example or displayed algebra, recomputed by scripts/verify-lecture.mjs. No benchmark or general improvement claim follows.
 -->
@@ -1819,7 +1441,7 @@ $$
 This is the same +0.25 derivative we calculated from the known reward means.
 
 <!--
-Appendix. Slide 69.
+Appendix. Slide 57.
 Close the loop between the ideal-gradient calculation and the sample estimator. The previous four-example sample mean .5 is not supposed to equal this exact expectation on every batch. This slide is a useful pause for checking understanding.
 Evidence: constructed example or displayed algebra, recomputed by scripts/verify-lecture.mjs. No benchmark or general improvement claim follows.
 -->
@@ -1844,7 +1466,7 @@ $$
 **Assumptions.** The environment and initial distribution are θ-independent. Policy support is fixed and positive. Returns are integrable; derivative and expectation interchange is valid. Use densities for continuous variables.
 
 <!--
-Appendix. Slide 70.
+Appendix. Slide 58.
 For a fixed finite horizon and finite spaces the displayed steps are straightforward finite sums. Random terminal times need appropriate integrability and derivative-interchange conditions. This accounts for the effects of actions on future rewards through their changed trajectory distribution.
 Sources: Sutton and Barto, Reinforcement Learning: An Introduction, Chapter 13; Nan Jiang, CS 443 Policy Gradient, https://nanjiang.cs.illinois.edu/files/cs443s24/10_pg.pdf
 -->
@@ -1875,7 +1497,7 @@ Here $p$ is the **joint** next-state and reward law. The deterministic-reward MD
 $$p(s',u\mid s,a)=P(s'\mid s,a)\,\mathbf 1\{u=R(s,a)\}.$$
 
 <!--
-Appendix. Slide 71.
+Appendix. Slide 59.
 The joint response kernel allows reward and next state to be correlated. The policy is Markov in its state representation. If the starting state is fixed, its initial-state factor is 1. This expression is for explanation; the learner does not need to evaluate the environment factors.
 -->
 
@@ -1905,7 +1527,7 @@ $$
 $$
 
 <!--
-Appendix. Slide 72.
+Appendix. Slide 60.
 Hold the recorded trajectory fixed in the derivative. The environment may be unknown or nondifferentiable; the policy likelihoods remain differentiable. Their log gradients can be computed without evaluating the environment factors.
 Sources: Sutton and Barto, Reinforcement Learning: An Introduction, Chapter 13; Nan Jiang, CS 443 Policy Gradient, https://nanjiang.cs.illinois.edu/files/cs443s24/10_pg.pdf
 -->
@@ -1933,7 +1555,7 @@ By linearity, it is enough to prove $\mathbb E[b(s)z_\theta(A,s)\mid s]=0$.
 Sample $A\sim\pi_\theta(\cdot\mid s)$. Fix $b(s)$ before sampling the action and reward.
 
 <!--
-Appendix. Slide 73.
+Appendix. Slide 61.
 This proof follows the baseline argument in Nan Jiang's CS 443 Policy Gradient slide labeled 7. Assume finite actions, differentiable policy probabilities with fixed support, and finite relevant expectations. The continuous-action version needs the corresponding differentiation-under-the-integral conditions. G can be a sampled return whose conditional mean is an action value.
 Sources: Sutton and Barto, Reinforcement Learning: An Introduction, Chapter 13; Nan Jiang, CS 443 Policy Gradient, https://nanjiang.cs.illinois.edu/files/cs443s24/10_pg.pdf
 -->
@@ -1958,7 +1580,7 @@ $$
 The steps use the log-derivative identity, linearity of differentiation, and normalization of the policy probabilities.
 
 <!--
-Appendix. Slide 74.
+Appendix. Slide 62.
 Do this line by line on the board. The first line is an expectation under the policy that generated the action. The third and fourth lines are the essential cancellation: the total probability mass is always 1. This is not a claim that an individual action's score is zero.
 Sources: Sutton and Barto, Reinforcement Learning: An Introduction, Chapter 13; Nan Jiang, CS 443 Policy Gradient, https://nanjiang.cs.illinois.edu/files/cs443s24/10_pg.pdf
 -->
@@ -1989,7 +1611,7 @@ $$
 Average over visited states and sum over time. The same equality holds for the full episodic gradient estimator.
 
 <!--
-Appendix. Slide 75.
+Appendix. Slide 63.
 Use the law of total expectation for the state distribution. Its dependence on theta does not break this zero-mean identity, which is evaluated at a fixed current theta. The same argument allows a time-dependent state baseline. The baseline output is held fixed while computing the policy gradient; do not add a derivative through its prediction.
 Sources: Sutton and Barto, Reinforcement Learning: An Introduction, Chapter 13; Nan Jiang, CS 443 Policy Gradient, https://nanjiang.cs.illinois.edu/files/cs443s24/10_pg.pdf
 -->
@@ -2016,7 +1638,7 @@ The raw estimator also has mean 0.25. Here its variance falls from **0.9375** to
 Preserving the mean is guaranteed under the stated conditions. Reducing variance depends on the baseline choice.
 
 <!--
-Appendix. Slide 76.
+Appendix. Slide 64.
 Verify variance with E[X^2]-(E[X])^2. The raw second moment is 1, and the centered second moment is .4375. Both means are .25. This is a numerical illustration, not a claim that any baseline always improves variance.
 Evidence: constructed example or displayed algebra, recomputed by scripts/verify-lecture.mjs. No benchmark or general improvement claim follows.
 -->
@@ -2049,7 +1671,7 @@ $$
 This minimizes variance of **one state’s contribution**. It need not minimize variance of a whole trajectory sum.
 
 <!--
-Appendix. Slide 77.
+Appendix. Slide 65.
 This slide derives a fixed-state result directly. Related primary analysis: Greensmith, Bartlett, and Baxter (2004), https://jmlr.org/papers/v5/greensmith04a.html . This is a fixed-state, single-score contribution calculation. Assume finite second moments and E[||z||²]>0. The expression is trace of gradient covariance for vector parameters, ordinary variance for a scalar parameter. It is not a global minimum-variance baseline formula for an arbitrary sum of dependent time-step contributions. In general b*=E[G||z||²]/E[||z||²], so v_pi(s)=E[G|s] is a useful predictor but not always the exact variance minimizer.
 Evidence: constructed example or displayed algebra, recomputed by scripts/verify-lecture.mjs. No benchmark or general improvement claim follows.
 -->
@@ -2074,7 +1696,7 @@ $$
 We could not factor a single $b(s)$ out of the action expectation. That restriction is essential.
 
 <!--
-Appendix. Slide 78.
+Appendix. Slide 66.
 This is a counterexample to casually subtracting arbitrary action-dependent predictions. Specialized action-dependent control variates require correction terms. A learned state baseline is treated as fixed for the actor gradient, and training it on the same sample can require additional care for exact finite-sample unbiasedness.
 Sources: Sutton and Barto, Reinforcement Learning: An Introduction, Chapter 13; Nan Jiang, CS 443 Policy Gradient, https://nanjiang.cs.illinois.edu/files/cs443s24/10_pg.pdf
 Evidence: constructed example or displayed algebra, recomputed by scripts/verify-lecture.mjs. No benchmark or general improvement claim follows.
@@ -2100,7 +1722,7 @@ $$
 So replacing $G_0$ by $G_t$ in the time-$t$ contribution preserves its expectation. Summing over $t$ proves the return-to-go estimator.
 
 <!--
-Appendix. Slide 79.
+Appendix. Slide 67.
 This is the same zero-mean score identity used for baselines. The action distribution conditional on the history is the Markov policy at the current state. Past rewards may correlate with the current state, so unconditional independence would be an incorrect justification.
 Sources: Sutton and Barto, Reinforcement Learning: An Introduction, Chapter 13; Nan Jiang, CS 443 Policy Gradient, https://nanjiang.cs.illinois.edu/files/cs443s24/10_pg.pdf
 -->
@@ -2127,7 +1749,7 @@ $$
 The factor inside $G_t$ measures delay from time $t$. The outer $\gamma^t$ measures time from the episode's start.
 
 <!--
-Appendix. Slide 80.
+Appendix. Slide 68.
 The whole-episode estimator G_0 sum(score) remains valid for a discounted G_0. The outer gamma^t appears when removing past rewards and expressing the remaining discounted rewards relative to t. The main lecture consistently uses gamma=1 so these factors equal 1.
 Sources: Sutton and Barto, Reinforcement Learning: An Introduction, Chapter 13; Nan Jiang, CS 443 Policy Gradient, https://nanjiang.cs.illinois.edu/files/cs443s24/10_pg.pdf
 -->
@@ -2152,7 +1774,7 @@ The **sum of discount weights** is exactly $\sum_{k\geq0}\gamma^k=1/(1-\gamma)$.
 It is a gradual weighting scale, not a hard cutoff or the same thing as episode length. The tail bound determines how much error a particular truncation permits.
 
 <!--
-Appendix. Slide 81.
+Appendix. Slide 69.
 The sum of weights is exactly 1/(1-gamma); calling it an effective horizon is an interpretation. An exponential decay time is -1/log(gamma), approximately this scale when gamma is close to 1. Gamma=1 has no finite discount horizon. This reasoning applies to the return objective regardless of how the policy is optimized.
 Evidence: constructed example or displayed algebra, recomputed by scripts/verify-lecture.mjs. No benchmark or general improvement claim follows.
 -->
@@ -2181,7 +1803,7 @@ Each sample receives more weight if the target distribution would produce it mor
 <p class="small">Here <MathInline tex="p" /> and <MathInline tex="q" /> name general distributions. An importance weight can exceed 1; it is not itself a probability.</p>
 
 <!--
-Appendix. Slide 82.
+Appendix. Slide 70.
 Source: Schulman et al., Trust Region Policy Optimization (2015), sections 2–4, https://arxiv.org/abs/1502.05477 . This finite discrete identity is a direct change of measure. Continuous variables use densities and integrals. With integrability and coverage, the ordinary sample mean of w(X)f(X) is unbiased for the target expectation. It need not have low variance. For the bandit, q is pi_old and p is pi_theta; the reward distribution conditioned on action stays unchanged.
 -->
 
@@ -2214,7 +1836,7 @@ Without the weights, the old-data gradient was $-0.20$.
 <div class="takeaway">This equality holds in expectation. A finite weighted sample still has estimation error.</div>
 
 <!--
-Appendix. Slide 83.
+Appendix. Slide 71.
 We use reward means only to verify the expectation analytically. An implementation uses observed R, weight pi_new(A)/pi_old(A), and the current score derivative. At fixed old and target policies the weighted one-step score estimator is unbiased. In an adaptively selected policy trained on the same finite batch, expectation statements need the usual dependence qualifications. The example is the exact counterpart of the earlier wrong-sign calculation.
 Evidence: constructed example or displayed algebra, recomputed by scripts/verify-lecture.mjs. No benchmark or general improvement claim follows.
 -->
@@ -2245,7 +1867,7 @@ Products can become extreme: ten factors of $1.6$ give a weight of about $110$.
 **PPO uses one action ratio per time step in a local surrogate.** It does not use this full-trajectory estimator.
 
 <!--
-Appendix. Slide 84.
+Appendix. Slide 72.
 Source: Nan Jiang, CS 443 Policy Gradient, https://nanjiang.cs.illinois.edu/files/cs443s24/10_pg.pdf . Source: Schulman et al., Trust Region Policy Optimization (2015), sections 2–4, https://arxiv.org/abs/1502.05477 . Assume support, finite relevant moments, and permission to interchange derivative and expectation. This formula applies ordinary trajectory importance sampling to the already-derived REINFORCE gradient. Products can have high variance over long horizons; this is a possibility, not a claim that every product necessarily explodes. A single PPO ratio does not account for how preceding action changes altered the distribution of the current state.
 -->
 
@@ -2281,7 +1903,7 @@ $$
 Farther away, $L_{\mathrm{sur}}$ need not track the actual return. PPO clips the surrogate and periodically collects new data.
 
 <!--
-Appendix. Slide 85.
+Appendix. Slide 73.
 Source: Schulman et al., Trust Region Policy Optimization (2015), sections 2–4, https://arxiv.org/abs/1502.05477 . Source: Schulman et al., Proximal Policy Optimization Algorithms (2017), sections 2–5, https://arxiv.org/abs/1707.06347 . This episode-sum convention aligns the gamma=1 start-state objective with the earlier lecture. In finite horizon tasks, time is included in the state as needed. The practical average over collected time steps differs by a batch scaling convention. Discounted start-state gradients require the corresponding time weighting discussed in the discount appendix. Equality requires exact old-policy advantages and the usual policy-gradient assumptions. At theta_old each ratio is 1 and its derivative is the score, recovering the on-policy gradient. Clipping intentionally modifies this surrogate away from theta_old; it is not an unbiased estimate of full new-policy return.
 -->
 
@@ -2312,7 +1934,7 @@ $$
 The old policy probabilities and advantage estimates stay fixed during these updates. A separate value loss trains the critic; implementations often add an entropy bonus.
 
 <!--
-Appendix. Slide 86.
+Appendix. Slide 74.
 The formula is the orange curve in the main lecture. Min matters: naively clipping the ratio in both directions loses the penalty for harmful moves. It is a surrogate objective on recent data, not an exact expression for the new policy return or a hard trust-region constraint.
 Source: Schulman et al. (2017), Proximal Policy Optimization Algorithms, https://arxiv.org/abs/1707.06347. PPO-Clip is the variant discussed here.
 -->
@@ -2346,7 +1968,7 @@ The penalty version can increase $\beta$ when KL is too large, and decrease it w
 <p class="small">KL is nonnegative and asymmetric. A penalty discourages change; it does not enforce a hard constraint.</p>
 
 <!--
-Appendix. Slide 87.
+Appendix. Slide 75.
 Source: Schulman et al., Trust Region Policy Optimization (2015), sections 2–4, https://arxiv.org/abs/1502.05477 . Source: Schulman et al., Proximal Policy Optimization Algorithms (2017), sections 2–5, https://arxiv.org/abs/1707.06347 . Main-lecture surrogate averages are understood with matching normalization in this schematic comparison; practical objectives use the same sampled-state averaging convention for the surrogate and KL term. TRPO approximately solves its constrained problem. The PPO paper section 4 specifies an adaptive beta schedule. Use natural logarithms for the numerical KL examples. Some implementations also stop PPO epochs early when a measured KL exceeds a target; this is an optional safeguard. An average on visited states does not directly constrain unseen states.
 Evidence: constructed example or displayed algebra, recomputed by scripts/verify-lecture.mjs. No benchmark or general improvement claim follows.
 -->
@@ -2376,7 +1998,7 @@ The reference penalty can coexist with PPO clipping. **Always specify which two 
 <p class="small">This is optional context for later study. The main lecture's PPO ratio always uses the policy that collected the current batch.</p>
 
 <!--
-Appendix. Slide 88.
+Appendix. Slide 76.
 Source: Ouyang et al., Training language models to follow instructions with human feedback (2022), section 3.5 / equation 2, https://arxiv.org/abs/2203.02155 . The displayed objective is schematic: for language models, condition on prompts and compare output sequence distributions, often implementing the log-ratio as per-token rewards. InstructGPT adds a KL penalty relative to a supervised reference and, in one variant, an auxiliary pretraining objective not shown here. Do not confuse the fixed-reference forward KL shown here with the old-to-new KL used on the preceding slide. This penalty changes the task objective, whereas a moving old-policy trust-region term controls optimization steps.
 -->
 
@@ -2403,7 +2025,7 @@ At a true terminal state, use zero continuation value. At an ordinary rollout cu
 Unlike basic REINFORCE, this can update from partial episodes. Accuracy now depends partly on the learned value estimates.
 
 <!--
-Appendix. Slide 89.
+Appendix. Slide 77.
 This is optional orientation, not a required derivation. Residuals and the sum must respect episode boundaries. Time-limit semantics depend on the task definition: only a genuine terminal state has zero continuation. Gamma discounts rewards; lambda controls the residual weighting. Neither is the PPO clipping parameter epsilon.
 Source: Schulman et al. (2017), Proximal Policy Optimization Algorithms, https://arxiv.org/abs/1707.06347. PPO-Clip is the variant discussed here.
 Source: Schulman et al., High-Dimensional Continuous Control Using Generalized Advantage Estimation, https://arxiv.org/abs/1506.02438
@@ -2429,7 +2051,7 @@ $$
 <p class="small">Here <MathInline tex="\gamma=1" />. The N episodes are independent at fixed θ; i indexes episodes and t indexes actions.</p>
 
 <!--
-Appendix. Slide 90.
+Appendix. Slide 78.
 N is the number of episodes, and T_i is the number of actions in episode i. This averages episode sums for the expected episodic-return objective. Repeated optimization on a fixed old batch is not the algorithm being demonstrated.
 Source: Williams (1992), Simple statistical gradient-following algorithms for connectionist reinforcement learning. https://link.springer.com/article/10.1007/BF00992696
 -->
@@ -2452,7 +2074,7 @@ class: appendix dense
 | $b(s),\ v_\pi(s),\ V_\phi(s)$ | Baseline, true state value, learned value prediction |
 
 <!--
-Appendix. Slide 91.
+Appendix. Slide 79.
 G_0 and g-hat have different roles and generally different dimensions. A trajectory return G_0(tau) is the numerical return of a particular recorded episode. The action mean r-bar(a) used in the bandit is E[R_1|A_0=a].
 -->
 
@@ -2501,7 +2123,7 @@ Original presenters:<br>Robert Molina and Saketh Kantipudi.
 <p class="small muted">Original lecture material is marked CC BY-NC-SA 4.0. This adaptation retains that license where applicable.<br>External sources retain their own terms.</p>
 
 <!--
-Appendix. Slide 92.
+Appendix. Slide 80.
 The supplied original Lecture 14 and the instructor's annotated slide images informed this revision. The original acknowledgment page credits Rahul Mangharam, Hongrui Zheng (lead), Matthew O’Kelly (lead), Johannes Betz (lead), Houssam Abbas, Joseph Auckley, Madhur Behl, Luca Carlone, Jack Harkins, Paril Jain, Kuk Jang, Paritosh Kelkar, Sertac Karaman, Dhruv Karthik, Nischal KN, Thejas Kesari, Matthew Lebermann, Kim Luong, Yash Pant, Varundev Shukla, Nitesh Singh, Siddharth Singh, Nandan Tumu, Zirui Zang, and many others.
 Original license: https://creativecommons.org/licenses/by-nc-sa/4.0/
 The numerical bandit and recorded two-action episode were constructed for teaching. The browser demonstration performs actual sampled updates with reproducible seed 443. The revision adds parameterized-policy, discount, sampled-update, and PPO clipping explorations.

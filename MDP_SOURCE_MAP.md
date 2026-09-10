@@ -36,7 +36,7 @@ The two-route example is chosen after defining expectation. It specifies a valid
 
 - Slide 15 introduces stopping at a terminal state and γ = 1. With reward −1 per move, finite expected episode length gives J = −E[T]. This equality is not used for the earlier discounted objective.
 - Slide 27 introduces random rewards before specifying the bandit outcomes. In this extension, R(s,a) denotes the conditional mean reward and the reward distribution is separately specified.
-- Slide 71 defines the joint response law p(s′,u | s,a). With deterministic rewards it reduces to P(s′ | s,a) times the indicator that u = R(s,a). This connects the general trajectory proof to the opening model.
+- Slide 59 defines the joint response law p(s′,u | s,a). With deterministic rewards it reduces to P(s′ | s,a) times the indicator that u = R(s,a). This connects the general trajectory proof to the opening model.
 
 ## Checks
 
