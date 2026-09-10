@@ -345,26 +345,26 @@ class: dense
 ---
 # Episodic tasks: stop at a terminal state
 
-In an **episodic MDP**, a trajectory ends on reaching a terminal state after $T$ actions.
+An episode stops when a terminal state is reached. Let $T$ be the **first time this happens**.
+
+$T$ is the episode length. It may vary with the policy and sampled transitions.
+
+For complete-episode analysis, we **assume** termination with probability 1:
+
+$$\Pr_\pi(T<\infty)=1.$$
+
+Having terminal states alone does not ensure this. A policy can keep looping.
+
+For a terminating episode:
 
 $$G_0=\sum_{t=0}^{T-1}\gamma^tR_{t+1}.$$
 
-With finite expected absolute return, we may set $\gamma=1$.
+With $\gamma=1$ and −1 per move, $G_0=-T$. Require $\mathbb E_\pi[T]<\infty$ for finite $J(\pi)=-\mathbb E_\pi[T]$.
 
-In the navigation task with −1 per move and terminal G:
-
-$$G_0=-T,\qquad J(\pi)=-\mathbb E_\pi[T].$$
-
-| Moves to G | $3$ | $8$ | $12$ |
-|---|---:|---:|---:|
-| Undiscounted return | $-3$ | $-8$ | $-12$ |
-
-**This is the convention for our REINFORCE examples:** complete episodes and $\gamma=1$.
-
-<p class="small">For the step-cost grid, require <MathInline tex="\mathbb E_\pi[T]<\infty" />. Fixed deadlines may require time in the state.</p>
+<p class="small">Our REINFORCE examples use complete episodes and <MathInline tex="\gamma=1" />. For general rewards, also require finite expected absolute return.</p>
 
 <!--
-This is an explicit change of formulation, corresponding to CS443’s indefinite-horizon episodic model. With gamma1 and -1 steps, finite expected time ensures a finite expected return. A bounded episode length and bounded rewards are sufficient in the later demos. Keeping gamma=.99 and simply stopping the zero tail would not change the discounted return; setting gamma1 does change it. Do not identify expected discounted cost with negative expected moves.
+T is the first hitting time of the terminal-state set: inf{t>=0 : S_t is terminal}, with inf(empty set)=infinity. It is not a preset horizon or a promise of reaching the goal after some known number of actions. From a nonterminal S_0, reaching S_T takes T actions. The distribution depends on the initial state distribution, policy, and environment. Having terminal states does not make arbitrary policies terminate: in our grid, always choosing North from (0,0) loops forever. State explicitly which policies satisfy the probability-one termination assumption. For undiscounted step costs, finite expected T is the integrability condition for finite J. In general, almost-sure termination alone need not ensure integrable total reward. A bounded episode length and bounded rewards are sufficient for the later demos. A fixed deadline is a separate task definition and may require time in the state; truncating data collection is not automatically environmental termination. This is an explicit change from the initial discounted absorbing-state model. Keeping gamma=.99 and simply stopping the zero tail would not change the discounted return; setting gamma1 does change it.
 Source: Nan Jiang, CS443 MDPs, printed slides 23–25, https://nanjiang.cs.illinois.edu/files/cs443s23/2_basic.pdf .
 -->
 

@@ -25,6 +25,8 @@ Updated 2026-09-10 from source commit `64ee865`. Old page numbers below refer to
 
 ## Knowledge and examples
 
+Slide 15 subsequently clarifies that T is the first terminal-state hitting time and may vary across episodes. Probability-one termination is an explicit assumption, not a guarantee provided by the existence of terminal states. For undiscounted step costs, finite expected T is required for finite expected return. The notes distinguish this from a preset horizon or rollout truncation.
+
 The baseline section states the state-only baseline identity, qualified variance reduction, and the definitions of v, Q, and A. It does not claim that every baseline reduces variance or that any sampled update improves return. The appendix retains the proof and the action-dependence caveat. Sources: Sutton and Barto, Chapters 3 and 13; [Spinning Up](https://spinningup.openai.com/en/latest/spinningup/rl_intro3.html).
 
 The PPO page uses the clipped actor surrogate in [Schulman et al. (2017)](https://arxiv.org/abs/1707.06347), Eq. 7. Hat-A estimates the collecting policy's advantage and stays fixed during optimization. The action ratio is introduced first. A Monte Carlo return minus a critic prediction is identified as one possible estimate; GAE remains in the appendix. Clipping does not impose a hard probability-ratio bound or guarantee a return increase.
