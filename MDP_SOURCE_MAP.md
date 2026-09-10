@@ -28,15 +28,14 @@ The previous audit used a general joint response kernel in the opening definitio
 | 14 | Apply discount weights | Interactive evaluation of fixed routes | 6–8; direct calculation |
 | 15 | Episodic formulation; undiscounted objective | Terminal navigation, G₀ = −T | 23–25 |
 | 16 | Reward/horizon express task preferences | Goal-only versus per-move reward | 6, 23; direct comparison |
-| 17 | Model access versus sample access | A navigation transition supplied to a learner | MDP definition plus the RL interaction model |
 
 The two-route example is chosen after defining expectation. It specifies a valid stationary policy: at (3,4), choose East with probability q or North with probability 1−q; after North, take East then South. There are no repeated nonterminal states on these routes. The manual slider calculates the policy’s expected return; it does not train it.
 
 ## Explicit changes of assumptions
 
 - Slide 15 defines T as the first time a terminal state is reached, rather than a preset horizon. Complete-episode analysis assumes probability-one termination under the policies considered; the presence of terminal states alone does not imply it. With γ = 1 and reward −1 per move, finite expected episode length gives finite J = −E[T]. This equality is not used for the earlier discounted objective.
-- Slide 27 introduces random rewards before specifying the bandit outcomes. In this extension, R(s,a) denotes the conditional mean reward and the reward distribution is separately specified.
-- Slide 59 defines the joint response law p(s′,u | s,a). With deterministic rewards it reduces to P(s′ | s,a) times the indicator that u = R(s,a). This connects the general trajectory proof to the opening model.
+- Slide 26 introduces random rewards before specifying the bandit outcomes. In this extension, R(s,a) denotes the conditional mean reward and the reward distribution is separately specified.
+- Slide 58 defines the joint response law p(s′,u | s,a). With deterministic rewards it reduces to P(s′ | s,a) times the indicator that u = R(s,a). This connects the general trajectory proof to the opening model.
 
 ## Checks
 
