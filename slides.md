@@ -235,18 +235,15 @@ class: dense
 ---
 # Example: expected return under a stochastic policy
 
-The **state value** averages returns when the policy starts from a given state:
-
-$$v_\pi(s)=\mathbb E_\pi[G_0\mid S_0=s].$$
-
-At $s=(3,4)$, let $q=\pi(\mathrm E\mid s)$ and $1-q=\pi(\mathrm N\mid s)$.
-
-After North, the policy takes East then South. The two possible returns are −1 and −2.9701.
+Same navigation MDP: $\gamma=0.99$. Fix the start at **$s_0=(3,4)$**. All four actions remain available.
 
 <PolicyReturn />
 
 <!--
-The value definition precedes the calculation. The specified policy gives two paths without revisiting a nonterminal state: East directly, or North then East then South. It is therefore a valid stationary policy from the illustrated start. Other unreachable states can be assigned arbitrary actions. The slider manually sets q; it is not a learning algorithm. The expectation is exact for the specified policy and gamma=.99.
+Connect the calculation to J(pi), already defined on slide 6. For this comparison the initial distribution is a point mass at (3,4), explicitly different from (0,0) on slide 8. The MDP transition/reward rules and gamma=.99 are unchanged. State-value notation is introduced later with values and advantages, not needed here.
+All four actions are available. From (3,4), North goes to (3,3), South hits the boundary and stays at (3,4), West goes to (2,4), and East reaches G=(4,4). Every one of these moves receives -1. The example policy specifically sets pi_q(N|s_0)=1-q, pi_q(S|s_0)=pi_q(W|s_0)=0, pi_q(E|s_0)=q. Zero probability is a policy choice, not an unavailable action. A uniform-random policy would give probability .25 to all four, and this two-route calculation would not apply to it.
+The continuation is stationary and state-based: choose East at (3,3) and South at (4,3). To complete the policy, choose East at every other state including G; all actions at G self-loop with reward zero. No nonabsorbing state is revisited on these two paths, so their probabilities are q and 1-q. At q=0 or 1, only one path has positive probability. The displayed two paths are consequences of this stipulated policy, not an exhaustive description of all possible grid trajectories.
+The original arithmetic is valid under these assumptions: path returns -1 and -2.9701, with mean -1.98505 at q=.5. The correction makes the omitted zero probabilities and fixed continuation explicit. Changing the slider changes the selected policy manually; it is not training. J is an expected return, not either individual path's return. Keep the zero-reward absorbing tail; the episodic extension is introduced separately on slide 15.
 Source: Nan Jiang, CS443 MDPs, printed slides 8, https://nanjiang.cs.illinois.edu/files/cs443s23/2_basic.pdf .
 -->
 

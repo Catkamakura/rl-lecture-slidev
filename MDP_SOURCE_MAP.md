@@ -21,7 +21,7 @@ The previous audit used a general joint response kernel in the opening definitio
 | 7 | Markov predictive sufficiency | No-action intuition | 21–22 |
 | 8 | Apply the MDP definition | Navigation with absorbing goal, γ = .99 | 5 |
 | 9 | Apply reward versus return | One-move and three-move continuations | 5, 8; direct calculation |
-| 10 | State value as an expectation | Manually vary a specified two-route policy | 8; direct calculation |
+| 10 | Apply the expected-return objective from a fixed start | Show all four actions; the chosen policy assigns zero to South/West | 8; direct calculation |
 | 11 | Apply the Markov condition | Two histories ending at the same cell | 5, 21; stipulated transitions |
 | 12 | State must retain reward-relevant information | CS443 consumable-food counterexample | 21–22 |
 | 13 | Boundedness of discounted return | Endless step-cost loop | 6–8; geometric-series derivation |
@@ -29,7 +29,7 @@ The previous audit used a general joint response kernel in the opening definitio
 | 15 | Episodic formulation; undiscounted objective | Terminal navigation, G₀ = −T | 23–25 |
 | 16 | Reward/horizon express task preferences | Goal-only versus per-move reward | 6, 23; direct comparison |
 
-The two-route example is chosen after defining expectation. It specifies a valid stationary policy: at (3,4), choose East with probability q or North with probability 1−q; after North, take East then South. There are no repeated nonterminal states on these routes. The manual slider calculates the policy’s expected return; it does not train it.
+The two-route example applies the expected-return objective from slide 6 with start fixed at (3,4). All four actions remain available. The policy deliberately assigns probability zero to South and West at this state; zero probability does not remove an action from the MDP. It specifies a valid stationary policy: at (3,4), choose East with probability q or North with probability 1−q; after North, take East then South. There are no repeated nonterminal states on these routes. The manual slider calculates the policy’s expected return; it does not train it.
 
 ## Explicit changes of assumptions
 

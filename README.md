@@ -53,7 +53,7 @@ Open the URL printed in the terminal. The included `dist/` build runs locally wi
 |---:|---|
 | 2 | Course roadmap with section links |
 | 8 | Navigate the discounted grid, including the absorbing goal |
-| 10 | Vary a specified policy and calculate its expected return |
+| 10 | See all four available actions, vary the chosen policy’s probabilities, and calculate its expected return |
 | 14 | Change gamma and inspect weighted route rewards |
 | 18 | Choose Uniform random or Always East, select a start cell, and run the policy; selection persists across cells |
 | 20 | Inspect all 24 grid-policy rows; select a cell to highlight its row and edit that row independently |

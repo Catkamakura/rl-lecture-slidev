@@ -51,3 +51,12 @@ Slide 19 compares the original grid, a finer grid, and continuous positions. The
 Sources: [CS443 function approximation, PDF pp.2,5](https://nanjiang.cs.illinois.edu/files/cs443s23/7_td_fa.pdf) for scaling and parameter sharing; [Sutton et al. (1999), PDF pp.1–2](https://proceedings.neurips.cc/paper_files/paper/1999/file/464d828b85b0bed98e80ade0a5c43b0f-Paper.pdf) for directly parameterized policies. These figures and manual edits illustrate representation; they do not establish better training or guaranteed generalization.
 
 Verification: the browser check counted all 24 rows and 96 probability entries, matched every nonterminal grid cell to its row, confirmed that one-row edits persist after changing selection, and checked both complete-table loads. It also verified that G has no selected action row and disables row editing. Rendered slides 19–22 had no equation errors or content overlapping the navigation bar. The public build continues to exclude notes.
+
+
+## Page 10: available actions versus the chosen policy
+
+The original example assigned q and 1-q to East and North without explicitly listing the zero probabilities on South and West. All four actions remain available in the grid. The revised slide shows the four next states and full probability vector [1-q,0,0,q], alongside shaded probability arrows. South is a valid boundary action that leaves (3,4) unchanged; West goes to (2,4). The two-path expectation applies only to this chosen policy and its fixed East/South continuation, not to an arbitrary stochastic policy.
+
+The return arithmetic is unchanged: -1 and -2.9701 at gamma=.99, averaging to -1.98505 at q=.5. The page now explicitly fixes the starting state and uses the previously introduced J objective, leaving state-value terminology to the later value/advantage section. Source: [CS443 MDPs, printed slides 5 and 8](https://nanjiang.cs.illinois.edu/files/cs443s23/2_basic.pdf), plus direct calculation under the stipulated policy.
+
+Verification checked all four next states and all 21 slider settings, including q=0 and q=1. Table probabilities, arrow probabilities, and the expected-return calculation agree. Slides 9–11 render without equation errors or overlap with the navigation bar. The public payload omits presenter notes.

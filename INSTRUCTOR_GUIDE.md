@@ -20,7 +20,7 @@ The footer and course map use these new page numbers. Appendix links are also up
 
 **Navigation (8).** The initial model has deterministic rewards, gamma=.99, and an absorbing goal. Every action outside G costs -1, including goal entry. Subsequent actions at G stay there and earn zero. Four East and four South actions produce discounted return about -7.725531. A ninth action leaves the state and return unchanged.
 
-**Return and expectation (9–10).** Starting at (3,4), East gives -1; North, East, South gives -2.9701 at gamma=.99. The specified stationary policy chooses these continuations with probabilities q and 1-q. At q=.5, expected return is -1.98505. The slider is a manual setting, not training.
+**Return and expectation (9–10).** Start explicitly at (3,4) with gamma=.99. All four actions are available: North moves to (3,3), South remains at (3,4), West moves to (2,4), and East reaches G. The displayed example policy assigns [1-q,0,0,q] to N/S/W/E at this state. The zero probabilities are policy choices, not action restrictions. It fixes East at (3,3) and South at (4,3). Only under this policy do the two illustrated paths have probabilities q and 1-q; a general or uniform-random policy can generate other paths. East gives return -1; North, East, South gives -2.9701. At q=.5, J=-1.98505. The page uses the already introduced expected-return objective J; values and advantages receive their own treatment later. The slider is a manual setting, not training.
 
 **Discounts (13–14).** Establish the geometric-series bound, then explore weighted route returns. Gamma=1 gives -8 and -12 for the routes and negative infinity for an endless loop. Slide 15 separately introduces episodic returns and the finite-expected-length condition for J=-E[T].
 
