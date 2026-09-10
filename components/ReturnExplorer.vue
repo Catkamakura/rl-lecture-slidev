@@ -1,12 +1,12 @@
 <script setup>
 import {ref, computed} from 'vue'
 import {routeReturn} from '../lib/teaching.mjs'
-const gamma = ref(.9)
+const gamma = ref(.99)
 const loop = computed(()=>gamma.value===1?'−∞':(-1/(1-gamma.value)).toFixed(3))
 </script>
 <template>
 <div class="return-explorer" @click.stop>
-  <label class="gamma-control">Discount factor γ = <strong>{{Number(gamma).toFixed(2)}}</strong><input aria-label="Return discount factor" type="range" min="0" max="1" step=".01" v-model.number="gamma"><button @click="gamma=1">No discount</button><button @click="gamma=.9">γ = 0.9</button></label>
+  <label class="gamma-control">Discount factor γ = <strong>{{Number(gamma).toFixed(2)}}</strong><input aria-label="Return discount factor" type="range" min="0" max="1" step=".01" v-model.number="gamma"><button @click="gamma=1">No discount</button><button @click="gamma=.9">γ = 0.9</button><button @click="gamma=.99">γ = 0.99</button></label>
   <div v-for="length in [8,12]" :key="length" class="route-row">
     <div class="route-label">{{length}} moves to G</div>
     <div class="reward-tiles"><div v-for="k in length" :key="k" :style="{background:`rgba(217,77,0,${.10+.45*gamma**(k-1)})`,color:'#13294b'}"><span>−1</span><small>×{{(gamma**(k-1)).toFixed(2)}}</small></div></div>
@@ -14,7 +14,7 @@ const loop = computed(()=>gamma.value===1?'−∞':(-1/(1-gamma.value)).toFixed(
   </div>
   <div class="tile-caption">Each tile is one reward. Its weight is 1, γ, γ², … from left to right.</div>
   <div class="loop-total">A policy that loops forever: <strong>{{loop}}</strong></div>
-  <p>With γ = 1, return is exactly minus the number of moves. With γ &lt; 1, later moves count less.</p>
+  <p>At γ = 1, an endless loop has return −∞. This endpoint lies outside the discounted formulation.</p>
 </div>
 </template>
 <style scoped>

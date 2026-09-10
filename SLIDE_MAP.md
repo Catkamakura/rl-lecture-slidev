@@ -4,21 +4,21 @@
 |---:|---|---|
 | 1 | Reinforcement learning | Overview |
 | 2 | Our route: from an RL task to a learning algorithm | Overview |
-| 3 | Formal problem: a Markov decision process | Define the task |
-| 4 | The navigation MDP | Define the task |
-| 5 | Interaction generates states, actions, and rewards | Define the task |
-| 6 | What makes this reinforcement learning? | Define the task |
-| 7 | Transition and reward functions in this grid | Define the task |
-| 8 | A policy specifies how the agent acts | Define the task |
-| 9 | The objective: maximize expected return | Define the task |
-| 10 | For navigation, this means minimizing expected moves | Define the task |
-| 11 | The Markov property | Define the task |
-| 12 | The MDP assumption, applied to navigation | Define the task |
-| 13 | Choosing a state: what information must it contain? | Define the task |
-| 14 | Same immediate reward, different future returns | Define the task |
-| 15 | The reward function must express the task goal | Define the task |
-| 16 | Why introduce a discount factor? | Define the task |
-| 17 | How discounting scores the same navigation routes | Define the task |
+| 3 | A Markov decision process | Define the task |
+| 4 | How an MDP generates experience | Define the task |
+| 5 | A policy specifies the action choice | Define the task |
+| 6 | The objective: maximize expected discounted return | Define the task |
+| 7 | The Markov property | Define the task |
+| 8 | Example: instantiate the navigation MDP | Define the task |
+| 9 | Example: reward and return compare different quantities | Define the task |
+| 10 | Example: expected return under a stochastic policy | Define the task |
+| 11 | Example: different histories, the same prediction | Define the task |
+| 12 | Example: when position is not a sufficient state | Define the task |
+| 13 | Why discounting makes the return well-defined | Define the task |
+| 14 | Example: apply the discount weights | Define the task |
+| 15 | Episodic tasks: stop at a terminal state | Define the task |
+| 16 | Example: choose a reward that matches the task | Define the task |
+| 17 | From an MDP to a reinforcement-learning problem | Define the task |
 | 18 | We have a task. What can the optimizer change? | Represent the policy |
 | 19 | Start with a table: one policy row per state | Represent the policy |
 | 20 | Why does a larger state space need more than a table? | Represent the policy |

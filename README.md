@@ -45,15 +45,16 @@ Open the URL printed in the terminal. The included `dist/` build runs locally wi
 
 ## Verification and claim audit
 
-[CLAIM_AUDIT.md](CLAIM_AUDIT.md) lists the removed or qualified claims and the basis for each slide. Run `node scripts/verify-lecture.mjs` to recompute the examples. This audit and presenter notes stay in the private source; the public build contains the lecture only.
+[MDP_SOURCE_MAP.md](MDP_SOURCE_MAP.md) documents the current CS443-based MDP section. [CLAIM_AUDIT.md](CLAIM_AUDIT.md) preserves the earlier claim corrections. Run `node scripts/verify-lecture.mjs` to recompute the examples. This audit and presenter notes stay in the private source; the public build contains the lecture only.
 
 ## Interactive teaching material
 
 | Slide | Interaction |
 |---:|---|
 | 2 | Course roadmap with section links |
-| 4 | Navigate the grid and observe move costs |
-| 17 | Change gamma and inspect weighted route rewards |
+| 8 | Navigate the discounted grid, including the absorbing goal |
+| 10 | Vary a specified policy and calculate its expected return |
+| 14 | Change gamma and inspect weighted route rewards |
 | 23 | Follow state features → scores → softmax probabilities |
 | 24 | Compare model-based, value-based, and policy-gradient routes |
 | 28 | Change theta and see expected action counts for exploration |

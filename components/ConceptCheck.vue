@@ -2,7 +2,7 @@
 import {ref,computed} from 'vue'
 const selected=ref(0),revealed=ref(false)
 const questions=[
- {label:'Objective',q:'In our grid, why does maximizing expected return favor shorter routes?',a:'Each move earns −1 and γ = 1. An episode of T moves has G₀ = −T, so J(π) = −Eπ[T]. The objective counts all remaining moves, not just the next reward.'},
+ {label:'Objective',q:'In the episodic grid with γ = 1, why does maximizing expected return favor shorter routes?',a:'Each move earns −1. An episode of T moves has G₀ = −T, so J(π) = −Eπ[T]. The objective counts all remaining moves, not just the next reward.'},
  {label:'Markov',q:'Does a Markov state let us ignore future rewards?',a:'No. It summarizes the information needed to predict future transitions, given the action. The action still changes later states and rewards. Prediction and the optimization objective are different questions.'},
  {label:'Policy',q:'What changes when θ changes? Why use shared weights?',a:'θ controls action probabilities. A shared model uses the same weights across states, so an update can change predictions at other states. This need not improve them. Those probabilities also determine which actions provide new training data.'},
  {label:'REINFORCE',q:'At θ = 0, A gives +3. With α = 0.4, what is the update?',a:'The log-probability derivative is 0.5. The sampled gradient is 3 × 0.5 = 1.5, so θnew = 0 + 0.4 × 1.5 = 0.6. The new probability of A is about 0.646.'},

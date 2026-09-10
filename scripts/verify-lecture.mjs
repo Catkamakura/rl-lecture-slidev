@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {gridPolicyDetails,baselineMetrics,routeReturn,oneUpdate} from '../lib/teaching.mjs';
+import {gridPolicyDetails,baselineMetrics,routeReturn,oneUpdate,gridResponse,nearGoalValue} from '../lib/teaching.mjs';
 import {createRun,runBatch,sigmoid} from '../lib/bandit.mjs';
 
 const close=(a,b,tol=1e-10)=>assert(Math.abs(a-b)<tol,`${a} != ${b}`);
@@ -10,6 +10,24 @@ const outcomes=p=>[
  {a:'B',r:1,q:1-p,z:-p},
 ];
 const expectation=(rows,f)=>rows.reduce((s,o)=>s+o.q*f(o),0);
+
+// CS443-style deterministic transitions/rewards, including the absorbing goal.
+for(let x=0;x<5;x++)for(let y=0;y<5;y++)for(const [dx,dy] of [[0,-1],[0,1],[-1,0],[1,0]]){
+ const result=gridResponse([x,y],[dx,dy]);
+ const goal=x===4&&y===4;
+ assert.deepEqual(result.state,goal?[4,4]:[Math.max(0,Math.min(4,x+dx)),Math.max(0,Math.min(4,y+dy))]);
+ assert.equal(result.reward,goal?0:-1);
+}
+assert.deepEqual(gridResponse([0,0],[-1,0]),{state:[0,0],reward:-1});
+assert.deepEqual(gridResponse([3,4],[1,0]),{state:[4,4],reward:-1});
+assert.deepEqual(gridResponse([4,4],[-1,0]),{state:[4,4],reward:0});
+close(routeReturn(3,.99),-2.9701);
+close(nearGoalValue(.5),-1.98505);
+for(let i=0;i<=20;i++)close(nearGoalValue(i/20),-(i/20)-(1-i/20)*2.9701);
+let gridState=[0,0],gridReturn=0;
+const moves=[...Array.from({length:4},()=>[1,0]),...Array.from({length:4},()=>[0,1]),[-1,0]];
+moves.forEach((move,t)=>{const response=gridResponse(gridState,move);gridState=response.state;gridReturn+=.99**t*response.reward});
+assert.deepEqual(gridState,[4,4]);close(gridReturn,routeReturn(8,.99));
 
 // Explicit finite distributions check the identities independently of demo helpers.
 for(const theta of [-2,-1,0,1,2]){
@@ -106,7 +124,7 @@ close(residuals.reduce((s,d,t)=>s+gamma**t*d,0),rewards.reduce((s,r,t)=>s+gamma*
 const run=createRun(443);for(let i=0;i<40;i++)runBatch(run);
 close(sigmoid(run.theta),.9316579033408068);
 console.log(JSON.stringify({
- verified:['finite-outcome expectations','policy-score derivatives','baseline cancellation','baseline variance','independent vs duplicated samples','sample updates','old-data bias and IS','two-step trajectory and discounted gradients','softmax','route returns and tail bounds','KL arithmetic','PPO piecewise formula','GAE telescoping'],
+ verified:['CS443 navigation transitions and absorbing rewards','near-goal policy expectation','finite-outcome expectations','policy-score derivatives','baseline cancellation','baseline variance','independent vs duplicated samples','sample updates','old-data bias and IS','two-step trajectory and discounted gradients','softmax','route returns and tail bounds','KL arithmetic','PPO piecewise formula','GAE telescoping'],
  seed443:{batches:40,episodesPerBatch:64,alpha:.4,pA:sigmoid(run.theta)},
  limit:'Numerical and algebraic checks do not establish learning guarantees.'
 },null,2));

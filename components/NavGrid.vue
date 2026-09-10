@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref } from 'vue'
-const props = defineProps({ mode: {default:'plain'}, interactive:Boolean, size:{default:360}, near:Boolean, discount:{default:.9} })
+import {gridResponse} from '../lib/teaching.mjs'
+const props = defineProps({ mode: {default:'plain'}, interactive:Boolean, absorbing:Boolean, size:{default:360}, near:Boolean, discount:{default:.9} })
 const start = computed(()=>props.near ? [3,4] : [0,0])
 const xy=ref([...start.value]), steps=ref(0), g=ref(0)
 const finished=computed(()=>xy.value[0]===4 && xy.value[1]===4)
@@ -15,18 +16,22 @@ function label(x,y){
  if(i>=0 && i<route.value.length-1){const q=route.value[i+1]; return q[0]>x?'→':q[0]<x?'←':q[1]>y?'↓':'↑'}
  return ''
 }
-function move(dx,dy){if(finished.value)return;xy.value=[Math.max(0,Math.min(4,xy.value[0]+dx)),Math.max(0,Math.min(4,xy.value[1]+dy))];g.value-=props.discount**steps.value;steps.value++}
+function move(dx,dy){
+ if(finished.value&&!props.absorbing)return;
+ const response=gridResponse(xy.value,[dx,dy]);
+ xy.value=response.state;g.value+=response.reward*props.discount**steps.value;steps.value++;
+}
 function reset(){xy.value=[...start.value];steps.value=0;g.value=0}
 </script>
 <template>
 <div class="nav-figure" :style="{width: size+'px'}">
- <table class="nav-grid" aria-label="Five by five navigation grid. Start at the upper left and goal at the lower right.">
+ <table class="nav-grid" :aria-label="`Five by five navigation grid. Start at (${start[0]}, ${start[1]}); goal at (4, 4).`">
  <tbody><tr v-for="y in 5" :key="y"><td v-for="x in 5" :key="x" :class="{goal:x===5&&y===5,visited:visited(x-1,y-1),agent:interactive&&(x-1)===xy[0]&&(y-1)===xy[1]}" :style="{height:(size/5)+'px'}">{{label(x-1,y-1)}}</td></tr></tbody>
  </table>
- <div class="legend">S = start / current state &nbsp; · &nbsp; G = goal</div>
+ <div class="legend">{{interactive?'● = current state':'S = start'}} &nbsp; · &nbsp; G = goal</div>
  <div v-if="interactive" class="demo-controls" @click.stop>
-  <div class="nav-buttons"><button @click="move(0,-1)" :disabled="finished">↑</button><button @click="move(0,1)" :disabled="finished">↓</button><button @click="move(-1,0)" :disabled="finished">←</button><button @click="move(1,0)" :disabled="finished">→</button><button class="reset" @click="reset">Reset</button></div>
-  <p aria-live="polite">{{ finished ? 'Goal reached' : 'Try a route' }} · {{steps}} {{steps===1?'move':'moves'}} · Total reward: {{g.toFixed(0)}}</p>
+  <div class="nav-buttons"><button aria-label="North" @click="move(0,-1)" :disabled="finished&&!absorbing">↑</button><button aria-label="South" @click="move(0,1)" :disabled="finished&&!absorbing">↓</button><button aria-label="West" @click="move(-1,0)" :disabled="finished&&!absorbing">←</button><button aria-label="East" @click="move(1,0)" :disabled="finished&&!absorbing">→</button><button class="reset" @click="reset">Reset</button></div>
+  <p aria-live="polite"><span data-nav-state>State: ({{xy[0]}}, {{xy[1]}})</span> · <span data-nav-steps>{{steps}}</span> steps<br>Discounted sum: <strong data-nav-return>{{discount===1?g.toFixed(0):g.toFixed(3)}}</strong></p>
  </div>
 </div>
 </template>

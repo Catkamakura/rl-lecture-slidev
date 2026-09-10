@@ -2,11 +2,11 @@
 
 ## Claim audit
 
-See [CLAIM_AUDIT.md](CLAIM_AUDIT.md) for the complete correction register and a basis for every slide. Outcome descriptions are limited to exact examples or the disclosed seeded run. An unbiased gradient is not a policy-improvement guarantee. Use plain SGD when illustrating the exact θ + α ĝ step.
+See [MDP_SOURCE_MAP.md](MDP_SOURCE_MAP.md) for the current MDP sequence and assumptions. [CLAIM_AUDIT.md](CLAIM_AUDIT.md) preserves the earlier correction register; its MDP coverage is superseded by the source map. Outcome descriptions are limited to exact examples or the disclosed seeded run. An unbiased gradient is not a policy-improvement guarantee. Use plain SGD when illustrating the exact θ + α ĝ step.
 
 ## Teaching structure
 
-Use the opening map to explain the argument. Each example has a purpose: navigation defines the task, the bandit makes a gradient update calculable, and a recorded episode extends the update through time. Return to the same bandit when introducing baselines.
+The MDP definition, policy, objective, and Markov property come first (slides 3–7). Navigation then demonstrates their consequences (8–14). Slides 15–17 introduce episodic tasks and the learning problem. Later, define the gradient estimator before working its bandit example. Return to that bandit for baselines.
 
 | Slides | Purpose | Suggested time in a 90-minute class |
 |---|---|---:|
@@ -43,9 +43,11 @@ Slide 24 defaults to policy gradients. Select the other routes to compare the in
 
 ## Demo results and teaching prompts
 
-**Navigation, slide 4.** Four East moves then four South moves reach G in eight actions, with return −8. A collision also costs −1. Entry into G costs −1 and terminates. The near-goal comparison on slide 14 starts at (3,4): East gives return −1; North, East, South gives −3. Markov prediction does not erase those future consequences.
+**Navigation, slide 8.** The opening model uses CS443’s deterministic reward function and gamma=.99. Every move outside G costs -1, including goal entry. G is absorbing: subsequent actions stay there with reward zero. Four East and four South actions yield a discounted sum of about -7.725531. A ninth action leaves the state and sum unchanged.
 
-**Discounting, slide 17.** At gamma=1, eight and twelve moves give −8 and −12; an endless loop gives −infinity. At gamma=.9, the route returns are about −5.695328 and −7.175705, and the loop has return −10. Discounting changes the objective. It is not required by the policy-gradient method itself. Bounded rewards and gamma<1 ensure convergence of the continuing sum.
+**Return and expectation, slides 9–10.** Start at (3,4). East gives -1; North, East, South gives -2.9701 at gamma=.99. Set q=.5 to average these returns to -1.98505. The q slider manually changes the stipulated policy. The definition of state value precedes this calculation.
+
+**Discounting, slides 13–14.** First establish the geometric-series bound. Then apply it to the route display, initially at gamma=.99. The no-discount endpoint shows the boundary case: -8, -12, and negative infinity. Slide 15 separately introduces finite expected episodic returns with gamma=1; only then use J=-E[T].
 
 **Shared policy, slide 23.** At theta=0, probabilities are all .25. At state (1,2), Set θ=1 gives features dx=.75, dy=.50 and scores [−.50, .50, −.75, .75] for N/S/W/E. Exponentiate and normalize to obtain probabilities; East is about .436979. Selecting another cell changes inputs; the slider changes shared weights. This is a restricted toy model, not a trained navigation controller. Function approximation supports generalization across states. It does not restore hidden information automatically.
 
@@ -73,7 +75,7 @@ For N independent episodes at fixed theta and a fixed baseline, the batch-mean v
 
 ## Important mathematical distinctions
 
-- The MDP tuple describes the task even if the learner does not know its transition or reward rules. The start distribution and terminal rule are specified separately.
+- The opening tuple (S,A,P,R,gamma) follows CS443: deterministic R, infinite horizon, gamma<1. Specify a start distribution for evaluation. The episodic and stochastic-reward extensions are introduced explicitly on slides 15 and 27. Appendix B relates the joint kernel p to P and R.
 - G_t is return data, J(theta) is expected performance, and g-hat estimates a parameter gradient. The learning examples use complete finite episodes and gamma=1.
 - REINFORCE differentiates the policy. It does not require a differentiable environment or a known transition model. The derivation assumes the environment has no direct dependence on theta.
 - Basic REINFORCE's uncorrected expectation is under the current policy. After an update, the old batch retains the old sampling frequencies. Recomputing log-probability derivatives does not change those frequencies.

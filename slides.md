@@ -18,12 +18,12 @@ drawings:
 mdc: true
 download: false
 ---
-
 # Reinforcement learning
 
 <div class="sub">MDPs, policy gradients, and REINFORCE</div>
 <p class="cover-question">Define the task.<br>Learn a policy from experience.</p>
-Navigation gives us the problem. A small bandit makes the learning update visible.<br>
+MDPs define the task. Navigation illustrates the definitions.<br>
+A small bandit makes the learning update visible.<br>
 We finish with a short bridge from REINFORCE to PPO.
 <div class="course">CS 498 · Robotics Team Project</div>
 
@@ -35,7 +35,6 @@ This is a project-based introduction. Teach the main argument and work the sampl
 ---
 class: structure
 ---
-
 # Our route: from an RL task to a learning algorithm
 
 <CourseMap />
@@ -44,422 +43,402 @@ class: structure
 
 <!--
 Overview. Slide 2.
-Use this map to preview the argument. Click a card to jump to its section. Return using Map in the footer. Each example has a job: grid for the task, bandit for a calculable gradient, a short recorded episode for temporal credit. Proofs are optional appendix material.
+Use this map to preview the argument. Define each concept first, then use the example to apply it. Click a card to jump to its section. Return using Map in the footer. The grid illustrates the MDP and objective; the bandit illustrates a gradient calculation. Proofs are optional appendix material.
 -->
 
 ---
 class: dense
 ---
 
-# Formal problem: a Markov decision process
+# A Markov decision process
 
-A **Markov decision process (MDP)** is specified here by
+We begin with the **infinite-horizon discounted MDP** used in CS443:
 
 $$
-\mathcal M=(\mathcal S,\mathcal A,p,\gamma).
+\mathcal M=(\mathcal S,\mathcal A,P,R,\gamma).
 $$
 
-| Component | Mathematical meaning | Navigation example |
-|---|---|---|
-| $\mathcal S$ | Set of states | Grid positions $(x,y)$ |
-| $\mathcal A$ | Set of actions | North, South, East, West |
-| $p(s',u\mid s,a)$ | Joint probability of next state $s'$ and reward $u$ | Neighbor or boundary stay, reward $-1$ |
-| $r(s,a)$, derived from $p$ | Expected immediate reward | $-1$ at nonterminal states |
-| $\gamma$ | Discount factor, $0\leq\gamma\leq1$ | Initially $1$: count every move equally |
+| Component | Definition |
+|---|---|
+| $\mathcal S$ | Finite set of states |
+| $\mathcal A$ | Finite set of actions |
+| $P:\mathcal S\times\mathcal A\to\Delta(\mathcal S)$ | Distribution of the next state |
+| $R:\mathcal S\times\mathcal A\to\mathbb R$ | Deterministic reward for a state–action pair |
+| $\gamma\in[0,1)$ | Discount factor |
 
-Also specify $S_0\sim\mu$ and termination. If a deadline affects the task, include time in the state.
+$\Delta(\mathcal S)$ is the set of probability distributions over states.
 
-<!--
-Define the task. Slide 3.
-Introduce the complete formal object first, then map every item to the same task. The navigation start is fixed. The goal is terminal. Gamma=1 is useful for terminating tasks with finite expected return; continuing discounted tasks use gamma<1. The MDP describes a task whether or not the learner knows its transition or reward functions.
-Sources: supplied Lecture 14; Nan Jiang, CS 443 MDP slides, https://nanjiang.cs.illinois.edu/files/cs443s23/2_basic.pdf
--->
+<p class="small">The process continues indefinitely. For evaluating a policy, also specify the start state or distribution <MathInline tex="S_0\sim\mu" />.</p>
 
----
----
-
-# The navigation MDP
-
-<div class="cols wide-right">
-<NavGrid :size="350" :discount="1" interactive />
-<div>
-
-$\mathcal S=\{0,1,2,3,4\}^2$. Start at $(0,0)$.
-
-$\mathcal A=\{\mathrm N,\mathrm S,\mathrm E,\mathrm W\}$.
-
-An action moves one cell. At the boundary, the agent stays in place.
-
-Every attempted move earns **−1**, including entry into the goal at $(4,4)$.
-
-The episode ends at G. We want a policy that reaches G in fewer moves.
-
-</div>
-</div>
+<p class="small muted">Definition: <a href="https://nanjiang.cs.illinois.edu/files/cs443s23/2_basic.pdf#page=2" target="_blank">CS443, MDPs, slide 2</a>.</p>
 
 <!--
-Define the task. Slide 4.
-Coordinates increase right and down. Demonstrate an east move, a boundary collision, and the shortest eight-move path. G is a cell label; G_t later denotes return. If the map and dynamics are known, planning solves this grid. It is our simple model of the RL interaction.
-Sources: supplied Lecture 14; Nan Jiang, CS 443 MDP slides, https://nanjiang.cs.illinois.edu/files/cs443s23/2_basic.pdf
+Introduce the mathematical model before any grid. P and R follow CS443 notation. Deterministic rewards are a deliberate starting assumption, not a restriction on all RL. Finite spaces make R bounded. The stochastic reward extension is introduced at the bandit. Use time zero and following-reward index t+1 consistently with the rest of this lecture.
+Source: Nan Jiang, CS443 MDPs, printed slides 2–3, https://nanjiang.cs.illinois.edu/files/cs443s23/2_basic.pdf .
 -->
 
 ---
 class: dense
 ---
 
-# Interaction generates states, actions, and rewards
+# How an MDP generates experience
+
+At time $t$, the agent sees $S_t$ and chooses $A_t$. The model then specifies:
+
+$$
+R_{t+1}=R(S_t,A_t),\qquad
+S_{t+1}\sim P(\cdot\mid S_t,A_t).
+$$
 
 <InteractionLoop class="compact-loop" />
 
-| State before action | Agent chooses | Environment returns | Next state |
-|---|---|---|---|
-| $S_t=(0,0)$ | $A_t=\mathrm E$ | $R_{t+1}=-1$ | $S_{t+1}=(1,0)$ |
+Repeating this interaction gives $S_0,A_0,R_1,S_1,A_1,R_2,\ldots$.
 
-The next decision uses $S_{t+1}$. Repeating the loop produces experience for learning.
-
-<p class="small">Uppercase denotes random quantities. Lowercase <MathInline tex="s_t,a_t,r_{t+1}" /> denotes recorded samples. The reward arrives after the action, hence its index <MathInline tex="t+1" />.</p>
+<p class="small">Uppercase denotes random quantities. Lowercase <MathInline tex="s_t,a_t,r_{t+1}" /> denotes observed values. <MathInline tex="R(s,a)" /> is the reward function; <MathInline tex="R_{t+1}" /> is the received reward.</p>
 
 <!--
-Define the task. Slide 5.
-The interaction diagram, notation, and concrete transition belong together. Distinguish acting from learning: the policy can collect a whole episode before an update. Feedback is a reward, not a correct-action training label.
+Read the conditional generation rule before the diagram. The reward is deterministic once the state and action are fixed, although its value across runs can vary when states or actions vary. P may still be stochastic. The model does not yet specify the agent’s action choice; the policy supplies that next.
+Source: Nan Jiang, CS443 MDPs, printed slides 2, https://nanjiang.cs.illinois.edu/files/cs443s23/2_basic.pdf .
 -->
 
 ---
 class: dense
 ---
 
-# What makes this reinforcement learning?
+# A policy specifies the action choice
 
-<div class="cols learning-feedback">
-<div>
+A **deterministic policy** maps a state to an action: $\pi:\mathcal S\to\mathcal A$.
 
-### A supervised action label
+A **stochastic policy** maps a state to an action distribution:
 
-At this cell, a teacher says:
+$$
+\pi:\mathcal S\to\Delta(\mathcal A),\qquad
+A_t\sim\pi(\cdot\mid S_t).
+$$
 
-<div class="feedback-card">“The correct action is East.”</div>
+Thus $\pi(a\mid s)\geq0$ and $\sum_a\pi(a\mid s)=1$.
 
-The learner can compare its prediction with that label.
+| What the policy specifies | What the MDP specifies |
+|---|---|
+| Which action to choose in each state | The next-state distribution and reward |
 
-</div>
-<div>
-
-### RL feedback
-
-The agent tries North and observes:
-
-<div class="feedback-card"><MathInline tex="s_{t+1}=(0,0),\quad r_{t+1}=-1" /></div>
-
-No correct action is supplied. Later rewards reveal the consequences.
-
-</div>
-</div>
-
-**The policy also determines which experience the learner collects.**
-
-<p class="small">If the grid's transitions and rewards are known, we can plan a route. In RL, the learner can improve from sampled interaction with an unknown environment.</p>
+We first use **stationary policies**: the action rule depends on the current state, with no separate time index.
 
 <!--
-Define the task. Slide 6.
-Source: Nan Jiang, CS 443 MDPs, https://nanjiang.cs.illinois.edu/files/cs443s23/2_basic.pdf . The North move is at the initial boundary (0,0), so the agent remains there. The displayed diagram is an illustrative contrast to supervised imitation, not a claim that all supervised tasks predict actions. A simulator may implement known-to-the-designer dynamics while the learning algorithm receives only samples.
+Define the policy independently of the example. A deterministic policy is a special case of a stochastic one with all probability on one action. Later function approximation parameterizes this mapping; it does not change the MDP definition. Finite-horizon policies may depend on time, addressed with the episodic extension.
+Source: Nan Jiang, CS443 MDPs, printed slides 8, https://nanjiang.cs.illinois.edu/files/cs443s23/2_basic.pdf .
 -->
 
 ---
 class: dense
 ---
 
-# Transition and reward functions in this grid
+# The objective: maximize expected discounted return
 
-The next-state marginal of the joint response law is:
-
-$$
-p(s'\mid s,a)=\Pr(S_{t+1}=s'\mid S_t=s,A_t=a).
-$$
-
-| Current state and action | Certain next state | Received reward |
-|---|---|---:|
-| $(0,0)$, East | $(1,0)$ | $-1$ |
-| $(0,0)$, West, into the boundary | $(0,0)$ | $-1$ |
-
-The reward function specifies the **mean immediate score** for a state–action pair:
+The **reward** $R_{t+1}$ scores one transition. The **return** counts the rewards from time $t$ onward:
 
 $$
-r(s,a)=\mathbb E[R_{t+1}\mid S_t=s,A_t=a]=-1\quad\text{for every nonterminal }s.
+G_t=\sum_{k=0}^{\infty}\gamma^kR_{t+k+1}.
 $$
 
-Here rewards are deterministic, so the observed reward equals that mean. A random-reward example comes later.
+For a fixed initial distribution $\mu$, the objective is
+
+$$
+\boxed{\max_\pi J(\pi)},\qquad
+J(\pi)=\mathbb E_{\mu,\pi,P}[G_0].
+$$
+
+The expectation includes random initial states, action choices, and transitions.
+
+**Actions affect future states and rewards.** The objective therefore concerns the full return.
+
+<p class="small muted">CS443, MDPs, slides 2 and 8. The discount bound is developed below.</p>
 
 <!--
-Define the task. Slide 7.
-The task designer chose a cost of one per attempted move so wasted moves count against the objective. r(s,a) is a function; R_{t+1} is its random feedback quantity in the general case; r_{t+1} is a realized sample. Do not present these as three separate mechanisms. At a terminal goal, the episode stops; an absorbing extension would have reward zero thereafter.
-Sources: supplied Lecture 14; Nan Jiang, CS 443 MDP slides, https://nanjiang.cs.illinois.edu/files/cs443s23/2_basic.pdf
--->
-
----
----
-
-# A policy specifies how the agent acts
-
-For a stochastic policy,
-
-$$
-\pi(a\mid s)=\Pr(A_t=a\mid S_t=s),
-\qquad \sum_{a\in\mathcal A}\pi(a\mid s)=1.
-$$
-
-For example, at the start $(0,0)$:
-
-| Action | North | South | East | West |
-|---|---:|---:|---:|---:|
-| $\pi(a\mid(0,0))$ | $0$ | $0.5$ | $0.5$ | $0$ |
-
-The agent samples South or East with equal probability. A deterministic policy assigns probability 1 to one action.
-
-A policy specifies a choice at each state, so it can produce many different routes.
-
-<!--
-Define the task. Slide 8.
-The policy is what we will learn. Transitions and rewards describe consequences. Here the policy may be stochastic even though the grid dynamics are deterministic. A single route is one outcome of running a policy.
-Sources: supplied Lecture 14; Nan Jiang, CS 443 MDP slides, https://nanjiang.cs.illinois.edu/files/cs443s23/2_basic.pdf
--->
-
----
----
-
-# The objective: maximize expected return
-
-An **episode** is one run ending after $T$ actions. Define its **return**:
-
-$$
-G_0=\sum_{t=0}^{T-1}\gamma^tR_{t+1}.
-$$
-
-The RL objective is
-
-$$
-\boxed{\pi^*\in\arg\max_\pi J(\pi)},
-\qquad J(\pi)=\mathbb E_{\mu,\pi,p}[G_0].
-$$
-
-The expectation includes the initial state, actions, transitions, and rewards. Assume $\mathbb E[|G_0|]<\infty$ for policies under comparison.
-
-<p class="small">The subscript 0 means “count from the start.” In the grid, <MathInline tex="\gamma=1" /> and each move contributes −1. We work out this objective next.</p>
-
-<!--
-Define the task. Slide 9.
-State the target early. Argmax returns a maximizing policy; J is its expected score. For random-reward environments, the expectation also includes reward randomness. The terminal time can depend on the trajectory. When using gamma=1, assume the candidate policies have finite expected episode return.
-Sources: supplied Lecture 14; Nan Jiang, CS 443 MDP slides, https://nanjiang.cs.illinois.edu/files/cs443s23/2_basic.pdf
+State the objective before instantiating navigation. G_t is a random return; J is its expectation from the specified start distribution. In this deterministic-reward formulation there is no additional reward draw after conditioning on the state and action. Finite states/actions and gamma<1 ensure integrability. The received-reward indexing is offset from CS443’s r_t=R(s_t,a_t), but the objective is the same.
+Source: Nan Jiang, CS443 MDPs, printed slides 2, 8, https://nanjiang.cs.illinois.edu/files/cs443s23/2_basic.pdf .
 -->
 
 ---
 class: dense
----
-
-# For navigation, this means minimizing expected moves
-
-With reward −1 per move and $\gamma=1$, an episode of $T$ moves has
-
-$$
-G_0=\underbrace{-1-1-\cdots-1}_{T\text{ moves}}=-T,
-\qquad J(\pi)=-\mathbb E_\pi[T].
-$$
-
-| Hypothetical policy behavior | Expected moves | Expected return |
-|---|---:|---:|
-| Always reaches G in 8 moves | $8$ | $-8$ |
-| 8 moves half the time, 12 otherwise | $0.5(8)+0.5(12)=10$ | $-10$ |
-
-$$
-\arg\max_\pi J(\pi)=\arg\min_\pi\mathbb E_\pi[T].
-$$
-
-The objective compares policies across their possible runs, including detours.
-
-<!--
-Define the task. Slide 10.
-These are illustrative policy behaviors, not claimed outputs of a trained navigator. The expectation matters even in deterministic dynamics because the policy can randomize. This calculation assumes finite expected time to goal. We later examine policies that loop forever.
-Sources: supplied Lecture 14; Nan Jiang, CS 443 MDP slides, https://nanjiang.cs.illinois.edu/files/cs443s23/2_basic.pdf
--->
-
----
 ---
 
 # The Markov property
 
-<p class="lead">Knowing the whole history <MathInline tex="S_0,\ldots,S_t" /> gives no better prediction of the next state than knowing just the current state <MathInline tex="S_t" />.</p>
+Let $H_t=(S_0,A_0,R_1,\ldots,S_t)$ be the history before action $A_t$.
 
-For a process with no action choice:
+The next-state distribution depends on the current state and action:
 
 $$
-\Pr(S_{t+1}\mid S_0,\ldots,S_t)
-=\Pr(S_{t+1}\mid S_t)
+\Pr(S_{t+1}\mid H_t,A_t)
+=\Pr(S_{t+1}\mid S_t,A_t).
 $$
 
-This is a statement about the **distribution** of the next state. The next state can still be random.
+Our reward rule also uses only this pair: $R_{t+1}=R(S_t,A_t)$.
+
+<div class="takeaway">For a process with no action choice: knowing the whole history <MathInline tex="S_0,\ldots,S_t" /> gives no better prediction of the next state than knowing just <MathInline tex="S_t" />.</div>
+
+<p class="small">This is predictive sufficiency. It does not say the next state is deterministic, or that future rewards can be ignored.</p>
 
 <!--
-Define the task. Slide 11.
-This is the exact idea requested by the instructor. The no-action process is often called a Markov chain. It does not claim deterministic dynamics. Next we restore the agent's action, which also affects the next state.
+The MDP model requires a sufficient state for its response distribution. The no-action wording preserves the instructor’s requested intuition; the displayed equation restores the action for controlled processes. The grid will demonstrate the assumption, and the consumable-food example will show when position alone fails it.
+Source: Nan Jiang, CS443 MDPs, printed slides 21–22, https://nanjiang.cs.illinois.edu/files/cs443s23/2_basic.pdf .
 -->
 
 ---
 class: dense
 ---
 
-# The MDP assumption, applied to navigation
+# Example: instantiate the navigation MDP
 
-Let $H_t=(S_0,A_0,R_1,\ldots,S_t)$ denote the history before action $A_t$.
+The grid below illustrates the preceding definition, using CS443’s navigation rules.
 
-$$
-\Pr(S_{t+1},R_{t+1}\mid H_t,A_t)
-=\Pr(S_{t+1},R_{t+1}\mid S_t,A_t).
-$$
+<div class="cols wide-right">
+<NavGrid :size="300" :discount="0.99" interactive absorbing />
+<div>
 
-Once we know the current state and action, earlier history adds no predictive information.
+$\mathcal S=\{0,1,2,3,4\}^2$, $\mathcal A=\{\mathrm N,\mathrm S,\mathrm E,\mathrm W\}$.
 
-| Earlier route | Current state | Chosen action | Next state, reward |
-|---|---|---|---|
-| East, East, South, South | $(2,2)$ | East | $(3,2),-1$ |
-| South, South, East, East | $(2,2)$ | East | $(3,2),-1$ |
+Start at $(0,0)$; the goal is $(4,4)$. Set $\gamma=0.99$.
 
-Both histories produce the same prediction because their current state and next action agree.
+**Transitions:** move one cell. A boundary move leaves the position unchanged.
 
-<!--
-Define the task. Slide 12.
-The equation is a conditional distribution equality, not a claim that the next state is deterministic. The grid table is one deterministic special case. Reward prediction must also be Markov.
-Sources: supplied Lecture 14; Nan Jiang, CS 443 MDP slides, https://nanjiang.cs.illinois.edu/files/cs443s23/2_basic.pdf
--->
+**Rewards:** $R(s,a)=-1$ outside G, and $R(\mathrm G,a)=0$.
 
----
----
+**Absorbing goal:** once at G, every action stays there and gives zero reward.
 
-# Choosing a state: what information must it contain?
-
-Suppose a cell gives **+1 only on the first visit**, when its food is collected.
-
-At the same position, the same move can now give different rewards depending on whether that food remains.
-
-Position alone is insufficient. A suitable state includes:
-
-$$
-S_t=(\text{position},\ \text{food still available?})
-$$
-
-The state keeps the relevant fact without storing every earlier move.
-
-<!--
-Define the task. Slide 13.
-This is the consumable-food example from CS 443. It illustrates how to choose a state, rather than implying every raw observation is automatically Markov. The original step-cost grid did not need this extra variable.
-Sources: supplied Lecture 14; Nan Jiang, CS 443 MDP slides, https://nanjiang.cs.illinois.edu/files/cs443s23/2_basic.pdf
--->
-
----
-class: dense
----
-
-# Same immediate reward, different future returns
-
-<div class="cols route-comparison">
-<div><NavGrid mode="east" :size="220" near /><h3>East, then stop</h3><p>Rewards: −1<br>Return: −1</p></div>
-<div><NavGrid mode="north" :size="220" near /><h3>North, East, South</h3><p>Rewards: −1, −1, −1<br>Return: −3</p></div>
+</div>
 </div>
 
-Both choices start at $(3,4)$ and receive the same next reward. The return distinguishes their later consequences.
-
-<div class="takeaway">Markov tells us what information predicts the future. The objective still counts rewards in that future.</div>
-
 <!--
-Define the task. Slide 14.
-This is a local comparison within the same navigation MDP, with gamma=1. We reset the episode at the illustrated state only for this comparison. The North route is one possible continuation, not the only one. The immediate reward cannot distinguish these choices; expected return can when comparing their continuations.
-Sources: supplied Lecture 14; Nan Jiang, CS 443 MDP slides, https://nanjiang.cs.illinois.edu/files/cs443s23/2_basic.pdf
--->
-
----
----
-
-# The reward function must express the task goal
-
-Suppose the task is **reach G in as few moves as possible**, with $\gamma=1$.
-
-| Reward assigned to each transition | 8-move route | 12-move route |
-|---|---:|---:|
-| $0$ until the final move, then $+1$ | $G_0=1$ | $G_0=1$ |
-| $-1$ for every attempted move | $G_0=-8$ | $G_0=-12$ |
-
-The first design rewards reaching G but gives both successful routes the same score.
-
-The second also penalizes wasted moves. That is why our MDP uses $r(s,a)=-1$ before termination.
-
-<div class="takeaway">The reward and discount define the objective. Whether training finds a good policy is a separate question.</div>
-
-<!--
-Define the task. Slide 15.
-Keep gamma=1 for both rows so the comparison isolates the reward definition. In the deterministic grid, entry into G is determined by s and a, so both rules can be expressed by r(s,a). This slide explains the purpose of the reward function instead of defining it through vague feedback language.
-Sources: supplied Lecture 14; Nan Jiang, CS 443 MDP slides, https://nanjiang.cs.illinois.edu/files/cs443s23/2_basic.pdf
+The 5-by-5 illustration uses the dynamics/reward/discount choices on CS443 slide 5. In the infinite-horizon model the process does not terminate at G; it has a zero-reward absorbing tail. Demonstrate a boundary attempt, the eight-step route, and one additional zero-reward action at G. Entry into G still costs -1 because reward depends on the state before the action. The interactive readout is the discounted sum collected so far.
+Source: Nan Jiang, CS443 MDPs, printed slides 5, https://nanjiang.cs.illinois.edu/files/cs443s23/2_basic.pdf .
 -->
 
 ---
 class: dense
 ---
 
-# Why introduce a discount factor?
+# Example: reward and return compare different quantities
 
-An East–West loop never reaches G. With reward −1 per move, its total is $-\infty$.
+The reward scores the next move. Return includes the continuation. Use $\gamma=0.99$ and start at $(3,4)$:
 
-Discounting gives continuing interaction a finite score when rewards are bounded:
+<div class="cols route-comparison">
+<div><NavGrid mode="east" :size="200" near /><h3>East to G</h3><p>Rewards: −1, 0, 0, …<br>Return: −1</p></div>
+<div><NavGrid mode="north" :size="200" near /><h3>North, East, South</h3><p>Rewards: −1, −1, −1, 0, …<br>Return: −1 − 0.99 − 0.99² = −2.9701</p></div>
+</div>
 
-$$
-G_t=R_{t+1}+\gamma R_{t+2}+\gamma^2 R_{t+3}+\cdots,
-\qquad 0\leq\gamma<1.
-$$
+Both first moves receive **−1**. Their illustrated continuations have different returns.
 
-<div class="cols discount-pair"><div>
-
-### Count every move equally
-
-$$-1-1-1-\cdots=-\infty$$
-
-</div><div>
-
-### Discount with γ = 0.9
-
-$$-1-0.9-0.9^2-\cdots=-10$$
-
-</div></div>
-
-**This changes the objective:** equally sized later rewards count less.
-
-<p class="small">Bounded episode lengths and rewards allow <MathInline tex="\gamma=1" />. Policy gradients do not require discounting.</p>
+<div class="takeaway">The Markov property identifies the information needed for prediction. The objective still includes future rewards.</div>
 
 <!--
-Define the task. Slide 16.
-Motivate discounting with the exact navigation task already formalized, as CS 443 does. In genuinely continuing tasks, infinite interaction is intentional rather than a failure. Average reward is another possible objective but is outside this lecture.
-Sources: supplied Lecture 14; Nan Jiang, CS 443 MDP slides, https://nanjiang.cs.illinois.edu/files/cs443s23/2_basic.pdf Give the reason before using the geometric-series computation. The finite-return claim requires bounded rewards and gamma<1. A policy gradient can optimize a discounted objective, but policy gradients themselves do not require discounting. The general bound and effective horizon are in the appendix.
-Sources: supplied Lecture 14; Nan Jiang, CS 443 MDP slides, https://nanjiang.cs.illinois.edu/files/cs443s23/2_basic.pdf
+Apply the reward and return definitions from slide 6 to two explicitly specified continuations. These are deterministic route calculations, not measured policy performance. Zero rewards after G make the infinite series terminate algebraically. The North route is one possible continuation, not every possible outcome of choosing North.
+Source: Nan Jiang, CS443 MDPs, printed slides 5, 8, https://nanjiang.cs.illinois.edu/files/cs443s23/2_basic.pdf .
 -->
 
 ---
+class: dense
 ---
 
-# How discounting scores the same navigation routes
+# Example: expected return under a stochastic policy
+
+The **state value** averages returns when the policy starts from a given state:
+
+$$v_\pi(s)=\mathbb E_\pi[G_0\mid S_0=s].$$
+
+At $s=(3,4)$, let $q=\pi(\mathrm E\mid s)$ and $1-q=\pi(\mathrm N\mid s)$.
+
+After North, the policy takes East then South. The two possible returns are −1 and −2.9701.
+
+<PolicyReturn />
+
+<!--
+The value definition precedes the calculation. The specified policy gives two paths without revisiting a nonterminal state: East directly, or North then East then South. It is therefore a valid stationary policy from the illustrated start. Other unreachable states can be assigned arbitrary actions. The slider manually sets q; it is not a learning algorithm. The expectation is exact for the specified policy and gamma=.99.
+Source: Nan Jiang, CS443 MDPs, printed slides 8, https://nanjiang.cs.illinois.edu/files/cs443s23/2_basic.pdf .
+-->
+
+---
+class: dense
+---
+
+# Example: different histories, the same prediction
+
+The Markov condition says that history adds no information once the current state and action are given.
+
+| History from $(0,0)$ | Current state | Next action | Next state | Reward |
+|---|---|---|---|---:|
+| East, East, South, South | $(2,2)$ | East | $(3,2)$ | $-1$ |
+| South, South, East, East | $(2,2)$ | East | $(3,2)$ | $-1$ |
+
+For either history:
+
+$$P((3,2)\mid(2,2),\mathrm E)=1,\qquad R((2,2),\mathrm E)=-1.$$
+
+Position is sufficient for this grid because its transition and reward rules use no other changing information.
+
+<!--
+This is an application of the already-stated Markov assumption. The two paths are constructed examples. Checking only two histories would not prove the property in an unknown environment; here the known transition and reward definitions establish it for every history.
+Source: Nan Jiang, CS443 MDPs, printed slides 5, 21, https://nanjiang.cs.illinois.edu/files/cs443s23/2_basic.pdf .
+-->
+
+---
+class: dense
+---
+
+# Example: when position is not a sufficient state
+
+The state must retain information that affects the next reward or transition.
+
+Now modify the task: one food cell gives **+1 on first arrival**, and 0 on later visits.
+
+| Before entering the food cell | Reward on entry |
+|---|---:|
+| Food remains | $+1$ |
+| Food was already collected | $0$ |
+
+The same position and move can give different rewards. Include the missing information:
+
+$$S_t=(\text{position},\ \text{food remains?}).$$
+
+<p class="small muted">CS443’s consumable-food example. This is a modified task, with a different reward rule.</p>
+
+<!--
+The modeling requirement precedes the counterexample. With one food item and otherwise unchanged grid dynamics, position plus food status suffices. This is CS443’s example of deterministic coordinate dynamics with non-Markov coordinate-only rewards. Do not silently mix its reward rule into the navigation task.
+Source: Nan Jiang, CS443 MDPs, printed slides 21–22, https://nanjiang.cs.illinois.edu/files/cs443s23/2_basic.pdf .
+-->
+
+---
+class: dense
+---
+
+# Why discounting makes the return well-defined
+
+An infinite sum of rewards need not converge. For bounded rewards and $0\leq\gamma<1$:
+
+$$
+|R(s,a)|\leq R_{\max}
+\quad\Longrightarrow\quad
+|G_t|\leq\sum_{k=0}^{\infty}\gamma^kR_{\max}
+=\frac{R_{\max}}{1-\gamma}.
+$$
+
+**Apply the bound to an endless grid loop:** every move gives −1.
+
+| Objective | Return along this loop |
+|---|---|
+| No discount, $\gamma=1$ | $-1-1-\cdots=-\infty$ |
+| Discount, $\gamma=0.99$ | $-1-0.99-0.99^2-\cdots=-100$ |
+
+Discounting also changes the objective: later rewards have smaller weights.
+
+<p class="small muted">CS443, MDPs, slides 6–8. The finite bound is why the initial formulation requires <MathInline tex="\gamma<1" />.</p>
+
+<!--
+Present the convergence result before the loop calculation. The bound follows from the triangle inequality and geometric series. Gamma=1 in this table is a comparison outside the initial discounted formulation, not a contradictory definition. Finite spaces make the deterministic reward function bounded. We do not claim a universal improvement in training speed from smaller gamma.
+Source: Nan Jiang, CS443 MDPs, printed slides 6–8, https://nanjiang.cs.illinois.edu/files/cs443s23/2_basic.pdf .
+-->
+
+---
+class: dense
+---
+
+# Example: apply the discount weights
 
 <ReturnExplorer />
 
 <!--
-Define the task. Slide 17.
-Set gamma=1 and compare -8, -12, and negative infinity. Move to .9: -5.695, -7.176, and -10. At small gamma, late detours barely matter. The shortest fixed route remains preferred here, but discounting changes the objective from expected total steps to expected discounted cost. It can change policy rankings in other tasks or under different route-length distributions.
-Sources: supplied Lecture 14; Nan Jiang, CS 443 MDP slides, https://nanjiang.cs.illinois.edu/files/cs443s23/2_basic.pdf
+This is a manual evaluation of stipulated routes using the return formula, not training. Begin at gamma=.99: eight moves give approximately -7.725531, twelve give -11.361513, and an endless loop gives -100. With gamma=.9 they are about -5.695328, -7.175705 and -10. The gamma=1 endpoint deliberately shows what happens without discounting: -8, -12 and negative infinity. Episodic undiscounted objectives are introduced on the next slide.
+Source: Nan Jiang, CS443 MDPs, printed slides 6–8, https://nanjiang.cs.illinois.edu/files/cs443s23/2_basic.pdf .
+-->
+
+---
+class: dense
+---
+
+# Episodic tasks: stop at a terminal state
+
+CS443 also considers **episodic MDPs**. A trajectory ends on reaching a terminal state after $T$ actions.
+
+$$G_0=\sum_{t=0}^{T-1}\gamma^tR_{t+1}.$$
+
+With finite expected absolute return, we may set $\gamma=1$.
+
+In the navigation task with −1 per move and terminal G:
+
+$$G_0=-T,\qquad J(\pi)=-\mathbb E_\pi[T].$$
+
+| Moves to G | $3$ | $8$ | $12$ |
+|---|---:|---:|---:|
+| Undiscounted return | $-3$ | $-8$ | $-12$ |
+
+**This is the convention for our REINFORCE examples:** complete episodes and $\gamma=1$.
+
+<p class="small">For the step-cost grid, require <MathInline tex="\mathbb E_\pi[T]<\infty" />. Fixed deadlines may require time in the state.</p>
+
+<!--
+This is an explicit change of formulation, corresponding to CS443’s indefinite-horizon episodic model. With gamma1 and -1 steps, finite expected time ensures a finite expected return. A bounded episode length and bounded rewards are sufficient in the later demos. Keeping gamma=.99 and simply stopping the zero tail would not change the discounted return; setting gamma1 does change it. Do not identify expected discounted cost with negative expected moves.
+Source: Nan Jiang, CS443 MDPs, printed slides 23–25, https://nanjiang.cs.illinois.edu/files/cs443s23/2_basic.pdf .
+-->
+
+---
+class: dense
+---
+
+# Example: choose a reward that matches the task
+
+The reward and horizon define which behaviors the objective prefers.
+
+Suppose the intended task is **reach G in as few moves as possible**, with $\gamma=1$.
+
+| Reward rule | 8-move route | 12-move route |
+|---|---:|---:|
+| $0$ before the final move, then $+1$ | $G_0=1$ | $G_0=1$ |
+| $-1$ for every move before termination | $G_0=-8$ | $G_0=-12$ |
+
+The first rule gives these successful routes equal return. The second distinguishes their lengths.
+
+<div class="takeaway">Check what the objective prefers before choosing a learning algorithm.</div>
+
+<!--
+The general task-formulation principle is stated before its two numerical illustrations. The two rows are alternative reward rules, not two feedback mechanisms of one environment. In this deterministic grid a final-entry reward can be expressed as a state-action function. These calculations concern objective preferences, not the behavior a trained algorithm is guaranteed to produce.
+Source: Nan Jiang, CS443 MDPs, printed slides 6, 23, https://nanjiang.cs.illinois.edu/files/cs443s23/2_basic.pdf .
+-->
+
+---
+class: dense
+---
+
+# From an MDP to a reinforcement-learning problem
+
+The MDP specifies the task. It need not be known to the learner.
+
+| Access to the environment | How a policy can be sought |
+|---|---|
+| Known transition and reward model | Plan using $P$ and $R$ |
+| Sampled interaction | Learn from observed states, actions, and rewards |
+
+For navigation, a sampled transition might be
+
+$$s_t=(0,0),\quad a_t=\mathrm N,\quad r_{t+1}=-1,\quad s_{t+1}=(0,0).$$
+
+This supplies an outcome, not a label saying which action is correct.
+
+The policy affects both **the return** and **which experience is collected**.
+
+<!--
+The planning-versus-learning distinction concerns the algorithm’s access to the model. A simulator designer may know the dynamics while the learning update receives only samples. The formal MDP definition alone does not constitute a learning algorithm. Use this as the transition to policy representation and the policy-gradient estimator. The North sample is a boundary collision from the previously defined grid.
+Source: Nan Jiang, CS443 MDPs, printed slides 2, 5, https://nanjiang.cs.illinois.edu/files/cs443s23/2_basic.pdf .
 -->
 
 ---
 class: structure dense
 ---
-
 # We have a task. What can the optimizer change?
 
 <CourseMap compact focus="policy" />
 
-<div class="bridge-pair"><div><h3>Defined so far</h3><p>States, actions, transitions, rewards.<br>A policy chooses the actions.</p></div><div><h3>Next question</h3><p>How can a table or a shared model represent a policy?</p></div></div>
+<div class="bridge-pair"><div><h3>Defined so far</h3><p>An MDP and its return objective.<br>A policy chooses the actions.</p></div><div><h3>Next question</h3><p>How can a table or a shared model represent a policy?</p></div></div>
 
 For the learning examples, use complete finite episodes and $\gamma=1$:
 
@@ -478,7 +457,6 @@ This closes the modeling section by returning to the original optimization targe
 ---
 class: dense
 ---
-
 # Start with a table: one policy row per state
 
 A policy gives action probabilities: $\pi_\theta(a\mid s)$. **θ contains the learnable numbers.**
@@ -507,7 +485,6 @@ Source: Nan Jiang, CS 443, function approximation motivation: https://nanjiang.c
 ---
 class: dense
 ---
-
 # Why does a larger state space need more than a table?
 
 Imagine extending navigation to a moving robot. Discretize four state variables:
@@ -534,7 +511,6 @@ Evidence: constructed example or displayed algebra, recomputed by scripts/verify
 ---
 class: dense
 ---
-
 # Function approximation: parameters shared across states
 
 Replace separate rows with a **shared function**: a linear model or neural network.
@@ -559,7 +535,6 @@ Source: Nan Jiang, CS 443, function approximation motivation: https://nanjiang.c
 ---
 class: dense
 ---
-
 # Specify the model before moving its parameter
 
 For our grid, the goal is at $(4,4)$. Let the current state be $s=(x,y)$.
@@ -614,7 +589,6 @@ Evidence: constructed example or displayed algebra, recomputed by scripts/verify
 ---
 class: dense
 ---
-
 # Watch the same model compute its probabilities
 
 <PolicyPlayground />
@@ -627,7 +601,6 @@ First leave theta at 0: every score is 0 and every exponential is 1. The denomin
 ---
 class: dense
 ---
-
 # Where do policy gradients fit in RL?
 
 All three routes aim to produce a good policy. Select a route to compare what it learns.
@@ -642,7 +615,6 @@ Source: Nan Jiang, CS 443 Policy Gradient, https://nanjiang.cs.illinois.edu/file
 ---
 class: dense
 ---
-
 # Policy gradients: objective, estimator, and update
 
 Choose policy parameters to maximize expected return:
@@ -674,7 +646,6 @@ The hat means an estimate computed from random data. It is not an approximate-eq
 ---
 class: dense
 ---
-
 # Episodic REINFORCE: the algorithm
 
 We use **episodic REINFORCE**, a Monte Carlo policy-gradient method. It estimates the gradient from complete current-policy episodes.
@@ -701,8 +672,9 @@ Source: Williams (1992), Simple statistical gradient-following algorithms for co
 
 ---
 ---
-
 # A one-decision MDP makes the update easier to see
+
+MDPs can also have **random rewards**. Specify their distribution for each state–action pair.
 
 **Constructed example:** one decision state, actions A and B, then termination.
 
@@ -726,7 +698,9 @@ Reward **+1** every time.
 
 The learner observes only the action it sampled and that action's reward. Here $G_0=R_1$.
 
-This is a **two-armed bandit**: the same RL objective becomes $\max_\theta\mathbb E_{\pi_\theta}[R_1]$.
+This is a **two-armed bandit** with objective $\max_\theta\mathbb E_{\pi_\theta}[R_1]$.
+
+<p class="small">For random rewards, <MathInline tex="R(s,a)" /> denotes their conditional mean. We compute it below.</p>
 
 <!--
 Learn from samples. Slide 27.
@@ -737,7 +711,6 @@ Evidence: constructed example or displayed algebra, recomputed by scripts/verify
 ---
 class: dense
 ---
-
 # The policy controls both actions and data collection
 
 The same bandit uses one parameter θ. Let $p$ be the probability of A:
@@ -760,7 +733,6 @@ Use theta=0, then the Favor A button. The bars show expected counts N*pi(a) in 1
 
 ---
 ---
-
 # The known reward rules let us check the objective
 
 The true mean rewards are:
@@ -776,7 +748,7 @@ $$
 J(\theta)=p\cdot2+(1-p)\cdot1=1+p
 $$
 
-Here $\bar r(a)=r(s,a)$. The learner receives sampled rewards.
+Here $\bar r(a)=R(s,a)$. The learner receives sampled rewards.
 
 For finite θ, $J(\theta)<2$. It approaches 2 as $\theta\to\infty$; no finite θ attains it.
 
@@ -789,7 +761,6 @@ Evidence: constructed example or displayed algebra, recomputed by scripts/verify
 ---
 class: dense
 ---
-
 # The one-action REINFORCE update
 
 Sample action $a$ from the current policy and observe reward $r_1$. Here $G_0=r_1$.
@@ -820,7 +791,6 @@ Source: Williams (1992), Simple statistical gradient-following algorithms for co
 ---
 class: dense
 ---
-
 # The two derivatives needed for our update
 
 For our sigmoid policy, $p=\pi_\theta(\mathrm A)=\sigma(\theta)$ and $\pi_\theta(\mathrm B)=1-p$.
@@ -847,7 +817,6 @@ Supply the derivative results so the class can concentrate on applying the updat
 
 ---
 ---
-
 # One sample, one parameter update
 
 <BanditUpdate />
@@ -860,7 +829,6 @@ Evidence: constructed example or displayed algebra, recomputed by scripts/verify
 
 ---
 ---
-
 # A batch averages the gradient contributions
 
 **One possible batch:** four episodes collected with a frozen policy, $p=0.5$.
@@ -886,7 +854,6 @@ Evidence: constructed example or displayed algebra, recomputed by scripts/verify
 
 ---
 ---
-
 # REINFORCE demo: updates from fresh batches
 
 <ReinforceDemo />
@@ -902,7 +869,6 @@ Evidence: constructed example or displayed algebra, recomputed by scripts/verify
 ---
 class: dense
 ---
-
 # Why basic REINFORCE collects a new batch
 
 Recall the one-action gradient. Its expectation uses the **current policy**:
@@ -929,7 +895,6 @@ Source: Nan Jiang, CS 443 Policy Gradient, https://nanjiang.cs.illinois.edu/file
 ---
 class: dense
 ---
-
 # Old action frequencies can reverse the gradient
 
 Same bandit: $\pi_\theta(\mathrm A)=p=\sigma(\theta)$, $\pi_\theta(\mathrm B)=1-p$.
@@ -964,7 +929,6 @@ Evidence: constructed example or displayed algebra, recomputed by scripts/verify
 ---
 class: structure dense
 ---
-
 # The same gradient idea extends to an episode
 
 <CourseMap compact focus="episodes" />
@@ -999,7 +963,6 @@ Ask students what changes when the episode is longer. The target is unchanged; t
 ---
 class: dense
 ---
-
 # From one decision to a sequence of decisions
 
 In navigation and most projects, an episode contains several actions. Write the recorded sequence as a trajectory $\tau$:
@@ -1025,7 +988,6 @@ Evidence: constructed example or displayed algebra, recomputed by scripts/verify
 
 ---
 ---
-
 # The complete-episode REINFORCE estimator
 
 For a whole episode, add the log-probability gradients of its sampled actions:
@@ -1051,7 +1013,6 @@ Sources: Sutton and Barto, Reinforcement Learning: An Introduction, Chapter 13; 
 
 ---
 ---
-
 # The two-action episode gives a numerical update
 
 Recall the recorded actions **A, A**, with rewards **0, 4**, so $G_0=4$.
@@ -1080,7 +1041,6 @@ Evidence: constructed example or displayed algebra, recomputed by scripts/verify
 ---
 class: dense
 ---
-
 # REINFORCE with return-to-go
 
 Recall the three-move navigation route with rewards $-1,-1,-1$ and $\gamma=1$:
@@ -1107,7 +1067,6 @@ Sources: Sutton and Barto, Reinforcement Learning: An Introduction, Chapter 13; 
 
 ---
 ---
-
 # The return weights are computed after the episode
 
 For $\gamma=1$, compute backward from the terminal state:
@@ -1133,7 +1092,6 @@ This is why REINFORCE waits for complete episodes. The weighted log-probability 
 ---
 class: dense
 ---
-
 # A negative weighted log loss implements gradient ascent
 
 Collect $N$ complete episodes at fixed θ. Let $i$ index episodes and $t$ index their actions. Optimizers minimize a loss:
@@ -1161,7 +1119,6 @@ The loss is a device for constructing the desired gradient. Its numerical value 
 ---
 class: dense
 ---
-
 # The code follows the return calculation and update
 
 Use plain SGD without momentum. Each episode stores `(reward, log_probability)` pairs.
@@ -1189,7 +1146,6 @@ The stored log probabilities must remain differentiable evaluations under the co
 ---
 class: structure dense
 ---
-
 # Unbiased gradients and noisy updates
 
 <CourseMap compact focus="baselines" />
@@ -1222,7 +1178,6 @@ The bandit demo shows p(A) and an analytical expected reward because its model i
 ---
 class: dense
 ---
-
 # Recall the bandit and its gradient estimator
 
 Return to the **one-decision bandit**. Reset the policy to $\theta=0$:
@@ -1257,7 +1212,6 @@ Evidence: constructed example or displayed algebra, recomputed by scripts/verify
 ---
 class: dense
 ---
-
 # Using expected return as the baseline
 
 At $p=0.5$, the current policy's expected return is
@@ -1289,7 +1243,6 @@ Evidence: constructed example or displayed algebra, recomputed by scripts/verify
 ---
 class: dense variance-definition
 ---
-
 # Variance: how far do estimates spread around their mean?
 
 For a scalar random quantity $X$ with mean $m=\mathbb E[X]$:
@@ -1320,7 +1273,6 @@ Evidence: constructed example or displayed algebra, recomputed by scripts/verify
 ---
 class: dense
 ---
-
 # Calculate the variance as we change the baseline
 
 <BaselineVariance />
@@ -1334,7 +1286,6 @@ Evidence: constructed example or displayed algebra, recomputed by scripts/verify
 ---
 class: dense
 ---
-
 # Independent batches: variance and estimation error
 
 Recall the batch update at fixed θ:
@@ -1365,7 +1316,6 @@ Evidence: constructed example or displayed algebra, recomputed by scripts/verify
 ---
 class: dense
 ---
-
 # Subtract a baseline without changing the mean gradient
 
 For one complete episode, replace $G_t$ with $G_t-b(s_t)$:
@@ -1408,10 +1358,9 @@ Sources: Sutton and Barto, Reinforcement Learning: An Introduction, Chapter 13; 
 ---
 class: dense
 ---
-
 # A learned value function provides a baseline
 
-Under the current policy, the **state value** is
+Recall the **state value** under the current policy:
 
 $$
 v_\pi(s)=\mathbb E_\pi[G_t\mid S_t=s].
@@ -1438,7 +1387,6 @@ A learned Monte Carlo baseline by itself does not require bootstrapping. Standar
 ---
 class: structure dense
 ---
-
 # From REINFORCE to PPO: reuse a batch carefully
 
 <CourseMap compact focus="ppo" />
@@ -1459,7 +1407,6 @@ Source: Schulman et al., Proximal Policy Optimization Algorithms (2017), section
 ---
 class: dense
 ---
-
 # Why trust a recent batch only near its collecting policy?
 
 The batch contains samples from $\pi_{\mathrm{old}}$. The bars below are **illustrative probabilities at one state**.
@@ -1485,7 +1432,6 @@ Source: Schulman et al., Proximal Policy Optimization Algorithms (2017), section
 ---
 class: dense
 ---
-
 # PPO weights actions by estimated advantage
 
 An **advantage** asks: how much better is this action than the state's usual outcome?
@@ -1516,7 +1462,6 @@ True advantage is a conditional expectation. A realized return minus a baseline 
 ---
 class: dense
 ---
-
 # The PPO ratio reweights actions from the old policy
 
 For each recorded state–action pair, keep the old probability fixed:
@@ -1545,7 +1490,6 @@ Source: Schulman et al., Trust Region Policy Optimization (2015), sections 2–4
 ---
 class: dense
 ---
-
 # PPO clipping discourages excessive changes
 
 PPO maximizes a **surrogate score** $L_t$. A larger score need not mean higher return. Here $\epsilon=0.2$.
@@ -1568,7 +1512,6 @@ Source: Schulman et al. (2017), Proximal Policy Optimization Algorithms, https:/
 ---
 class: dense
 ---
-
 # KL divergence offers another way to limit policy change
 
 **KL divergence** measures how different two action distributions are at a state. It is zero when they agree.
@@ -1598,7 +1541,6 @@ Source: Schulman et al., Trust Region Policy Optimization (2015), sections 2–4
 ---
 class: dense
 ---
-
 # PPO retains the interaction-and-update loop
 
 <div class="learning-cycle"><div>Collect a rollout<br>with <MathInline tex="\pi_{\mathrm{old}}" /></div><span>→</span><div>Use the critic<br>to estimate <MathInline tex="\hat A_t" /></div><span>→</span><div>Take several<br>clipped updates</div><span>→</span><div>Collect fresh data<br>with the new policy</div></div>
@@ -1622,7 +1564,6 @@ Source: Schulman et al. (2017), Proximal Policy Optimization Algorithms, https:/
 ---
 class: dense
 ---
-
 # Suggested project workflow
 
 <div class="project-stages"><div><b>1 · Define</b><p>State, actions, reward.<br>Termination and evaluation.</p></div><span>→</span><div><b>2 · Verify</b><p>Run a random policy.<br>Inspect one episode.</p></div><span>→</span><div><b>3 · Learn</b><p>Implement REINFORCE.<br>Check one update by hand.</p></div></div>
@@ -1641,7 +1582,6 @@ This is a suggested development route, not a claim that the course assignment re
 ---
 class: dense
 ---
-
 # Check the full argument
 
 <ConceptCheck />
@@ -1656,7 +1596,6 @@ Answers: reward -1 and gamma1 give J=-E[T]; Markov is predictive sufficiency, no
 ---
 class: appendix dense
 ---
-
 # Optional proofs and implementation reference
 
 The main lecture uses the update rules. Open a topic to see why they work.
@@ -1671,7 +1610,6 @@ Use these as optional board material or follow-up reading. Appendix C preserves 
 ---
 class: appendix dense
 ---
-
 # A.0 Conditional expectation: average within a group
 
 In our bandit, condition on **which action was chosen**:
@@ -1700,7 +1638,6 @@ Source: ProbabilityCourse, Conditional Expectation: https://www.probabilitycours
 ---
 class: appendix dense
 ---
-
 # A.0 The law of total expectation
 
 For integrable $X$ and discrete $Y$, average within each group, then weight by its probability.
@@ -1733,7 +1670,6 @@ Source: ProbabilityCourse, Conditional Expectation: https://www.probabilitycours
 ---
 class: appendix dense proof-wide
 ---
-
 # A.0 Why the group averages give the overall mean
 
 For finite discrete variables $X$ and $Y$:
@@ -1768,7 +1704,6 @@ Source: ProbabilityCourse, Conditional Expectation: https://www.probabilitycours
 ---
 class: appendix dense proof-wide
 ---
-
 # A. REINFORCE for one decision
 
 **Assumptions.** Finite actions, differentiable $\pi_\theta(a)>0$, integrable rewards, and no direct dependence of the environment on θ. Write $\bar r(a)=\mathbb E[R_1\mid A_0=a]$.
@@ -1804,7 +1739,6 @@ Sources: Sutton and Barto, Reinforcement Learning: An Introduction, Chapter 13; 
 ---
 class: appendix dense proof-wide
 ---
-
 # A. Replace the mean reward with a sampled reward
 
 Write $z_\theta(a)=\nabla_\theta\log\pi_\theta(a)$. Once action $a$ is fixed, this factor is fixed.
@@ -1840,7 +1774,6 @@ Sources: Sutton and Barto, Reinforcement Learning: An Introduction, Chapter 13; 
 ---
 class: appendix dense
 ---
-
 # A. Derivatives for the two-action policy
 
 For $p=\sigma(\theta)$, we have $dp/d\theta=p(1-p)$. Thus
@@ -1869,7 +1802,6 @@ Evidence: constructed example or displayed algebra, recomputed by scripts/verify
 ---
 class: appendix dense
 ---
-
 # A. Numerical check of the expected gradient
 
 At $p=0.5$, the outcomes and their probabilities are:
@@ -1895,7 +1827,6 @@ Evidence: constructed example or displayed algebra, recomputed by scripts/verify
 ---
 class: appendix dense
 ---
-
 # B. The same argument applies to trajectories
 
 For a recorded trajectory $\tau$, let $P_\theta(\tau)$ be its probability and $G_0(\tau)$ its fixed observed return.
@@ -1921,7 +1852,6 @@ Sources: Sutton and Barto, Reinforcement Learning: An Introduction, Chapter 13; 
 ---
 class: appendix dense
 ---
-
 # B. Factoring the trajectory probability
 
 For a two-action episode, its probability factors as:
@@ -1940,7 +1870,9 @@ $$
 | $\pi_\theta(a_t\mid s_t)$ | Probability that the policy chooses the action |
 | $p(s_{t+1},r_{t+1}\mid s_t,a_t)$ | Probability of the environment's response |
 
-The Markov assumption lets the environment factor depend on the current state and action.
+Here $p$ is the **joint** next-state and reward law. The deterministic-reward MDP is the special case
+
+$$p(s',u\mid s,a)=P(s'\mid s,a)\,\mathbf 1\{u=R(s,a)\}.$$
 
 <!--
 Appendix. Slide 71.
@@ -1950,7 +1882,6 @@ The joint response kernel allows reward and next state to be correlated. The pol
 ---
 class: appendix dense proof-wide
 ---
-
 # B. Only policy factors contribute direct derivatives
 
 For the general trajectory, take the logarithm of its probability factorization:
@@ -1982,7 +1913,6 @@ Sources: Sutton and Barto, Reinforcement Learning: An Introduction, Chapter 13; 
 ---
 class: appendix dense
 ---
-
 # C. What we need to show
 
 Fix a state $s$ and the current policy parameters $\theta$. Define the action's score vector:
@@ -2011,7 +1941,6 @@ Sources: Sutton and Barto, Reinforcement Learning: An Introduction, Chapter 13; 
 ---
 class: appendix dense
 ---
-
 # C. The expected score is zero
 
 Expand the conditional expectation over actions:
@@ -2037,7 +1966,6 @@ Sources: Sutton and Barto, Reinforcement Learning: An Introduction, Chapter 13; 
 ---
 class: appendix dense
 ---
-
 # C. Subtracting b leaves the mean unchanged
 
 Because $b(s)$ does not depend on the sampled action:
@@ -2069,7 +1997,6 @@ Sources: Sutton and Barto, Reinforcement Learning: An Introduction, Chapter 13; 
 ---
 class: appendix dense
 ---
-
 # C. The bandit verifies the cancellation
 
 At $p=0.5$, use $b=1.5$:
@@ -2097,7 +2024,6 @@ Evidence: constructed example or displayed algebra, recomputed by scripts/verify
 ---
 class: appendix dense proof-wide
 ---
-
 # C. The baseline changes gradient variance, not reward variance
 
 Fix a state and θ. Let $z=\nabla_\theta\log\pi_\theta(A\mid s)$, $\hat g_b=(G-b)z$. Assume finite second moments and $\mathbb E[\|z\|^2]>0$.
@@ -2131,7 +2057,6 @@ Evidence: constructed example or displayed algebra, recomputed by scripts/verify
 ---
 class: appendix dense
 ---
-
 # C. An action-dependent baseline can remove the true signal
 
 In the same bandit, try $b(\mathrm A)=2$ and $b(\mathrm B)=1$.
@@ -2158,7 +2083,6 @@ Evidence: constructed example or displayed algebra, recomputed by scripts/verify
 ---
 class: appendix dense
 ---
-
 # C. Why return-to-go preserves the expected gradient
 
 With $\gamma=1$, write $G_0=C_t+G_t$, where $C_t=R_1+\cdots+R_t$ is already known before action $A_t$.
@@ -2184,7 +2108,6 @@ Sources: Sutton and Barto, Reinforcement Learning: An Introduction, Chapter 13; 
 ---
 class: appendix dense
 ---
-
 # D. Discounted return-to-go needs a time weight
 
 For $J(\theta)=\mathbb E[G_0]$ and
@@ -2212,7 +2135,6 @@ Sources: Sutton and Barto, Reinforcement Learning: An Introduction, Chapter 13; 
 ---
 class: appendix dense
 ---
-
 # D. Discounting and effective horizon
 
 For $|R_{t+1}|\leq R_{\max}$ and $0\leq\gamma<1$:
@@ -2238,7 +2160,6 @@ Evidence: constructed example or displayed algebra, recomputed by scripts/verify
 ---
 class: appendix dense
 ---
-
 # E. Importance sampling changes which distribution we average over
 
 We want an expectation under a **target** distribution $p$, but our samples come from $q$.
@@ -2267,7 +2188,6 @@ Source: Schulman et al., Trust Region Policy Optimization (2015), sections 2–4
 ---
 class: appendix dense
 ---
-
 # E. Reweighting fixes the bandit gradient
 
 Recall the old batch at $p_{\mathrm{old}}=0.5$ and the new policy with $p=0.8$.
@@ -2302,7 +2222,6 @@ Evidence: constructed example or displayed algebra, recomputed by scripts/verify
 ---
 class: appendix dense proof-wide
 ---
-
 # E. Correcting a whole trajectory needs a product of ratios
 
 Assume fixed old and target policies, θ-independent dynamics, and old-policy support covering the target. Environment factors cancel:
@@ -2333,7 +2252,6 @@ Source: Nan Jiang, CS 443 Policy Gradient, https://nanjiang.cs.illinois.edu/file
 ---
 class: appendix dense proof-wide
 ---
-
 # E. PPO reweights actions while retaining old state samples
 
 At a fixed state $s$, the importance-sampling identity is exact:
@@ -2370,7 +2288,6 @@ Source: Schulman et al., Trust Region Policy Optimization (2015), sections 2–4
 ---
 class: appendix dense
 ---
-
 # F. The PPO-Clip objective
 
 For a recorded state–action pair, define $\rho_t(\theta)=\pi_\theta(a_t\mid s_t)/\pi_{\mathrm{old}}(a_t\mid s_t)$. PPO-Clip maximizes the batch average of
@@ -2403,7 +2320,6 @@ Source: Schulman et al. (2017), Proximal Policy Optimization Algorithms, https:/
 ---
 class: appendix dense
 ---
-
 # F. KL constraints and KL penalties
 
 For a recorded state, compare the full old and new action distributions:
@@ -2438,7 +2354,6 @@ Evidence: constructed example or displayed algebra, recomputed by scripts/verify
 ---
 class: appendix dense
 ---
-
 # F. A reference-policy penalty serves a different purpose
 
 Later applications also use KL regularization. For example, RL from human feedback can penalize drift from a **fixed reference policy**.
@@ -2468,7 +2383,6 @@ Source: Ouyang et al., Training language models to follow instructions with huma
 ---
 class: appendix dense
 ---
-
 # F. How a critic can estimate advantages
 
 One temporal-difference residual compares an observed transition with the critic's prediction:
@@ -2498,7 +2412,6 @@ Source: Schulman et al., High-Dimensional Continuous Control Using Generalized A
 ---
 class: appendix dense
 ---
-
 # G. Complete episodic REINFORCE
 
 1. **Collect $N$ complete episodes** with the current policy, holding its parameters fixed.
@@ -2524,14 +2437,13 @@ Source: Williams (1992), Simple statistical gradient-following algorithms for co
 ---
 class: appendix dense
 ---
-
 # Notation reference
 
 | Symbol | Meaning |
 |---|---|
 | $S_t,A_t,R_{t+1}$ | State, action, following reward as random quantities |
 | $s_t,a_t,r_{t+1}$ | Recorded samples |
-| $p(s',r\mid s,a)$ | Environment response distribution |
+| $P(s'\mid s,a),\ p(s',u\mid s,a)$ | Next-state law; joint next-state and reward law |
 | $\pi_\theta(a\mid s)$ | Parameterized action-selection policy |
 | $\tau,\ P_\theta(\tau)$ | Recorded trajectory and its probability |
 | $T,\ G_t,\ G_0$ | Terminal time, return-to-go, whole-episode return |
@@ -2547,7 +2459,6 @@ G_0 and g-hat have different roles and generally different dimensions. A traject
 ---
 class: appendix dense sources-slide
 ---
-
 # Sources and acknowledgments
 
 <div class="cols">

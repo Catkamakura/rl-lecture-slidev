@@ -1,5 +1,7 @@
 # Lecture claim audit
 
+**Historical snapshot.** The subsequent [MDP revision](MDP_SOURCE_MAP.md) follows CS443’s deterministic-reward definition and supersedes this document’s MDP coverage and joint-kernel opening. The prior correction record below is retained for traceability.
+
 Audited on 2026-09-10 against source commit `f1373507c422951db08a47ea9a9c3b5b29512426`.
 
 Scope: all 92 current slides, presenter notes, interactive component text and calculations, and the instructor guide. This audits the delivered version, not every historical draft. The records below separate false implications, missing assumptions, terminology, and labeling; **the edit count is not a count of hallucinated facts**.
